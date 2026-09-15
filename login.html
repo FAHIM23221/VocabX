@@ -3,163 +3,395 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>লগইন — শব্দভাণ্ডার</title>
+<title>VocabX — লগইন</title>
+<link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<style>
-  .auth-wrap{ padding: 60px 24px 40px; max-width:480px; margin:0 auto; }
-  .auth-brand{ font-family:'Fraunces', serif; font-style:italic; font-size:1.9rem; color:var(--indigo); text-align:center; margin-bottom: 6px; }
-  .auth-sub{ text-align:center; color:var(--ink-soft); margin-bottom:32px; font-size:0.92rem; }
-  .auth-tabs{ display:flex; gap:24px; justify-content:center; border-bottom:1px solid var(--line); margin-bottom:28px; }
-  .auth-tab{ background:none; border:none; font-family:'Hind Siliguri',sans-serif; font-size:1rem; color:var(--ink-soft); padding:8px 2px 12px; cursor:pointer; border-bottom:2px solid transparent; }
-  .auth-tab.is-active{ color:var(--indigo); font-weight:600; border-bottom-color:var(--terracotta); }
-  .field{ margin-bottom:16px; }
-  .field label{ display:block; font-size:0.85rem; color:var(--ink-soft); margin-bottom:6px; }
-  .field input{
-    width:100%; padding:13px 14px; border-radius:10px; border:1.5px solid var(--line);
-    background:#FBF6EA; font-family:'Hind Siliguri',sans-serif; font-size:1rem; color:var(--ink);
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
   }
-  .field input:focus{ outline:none; border-color:var(--indigo); }
-  .auth-error{ color:var(--terracotta); font-size:0.88rem; min-height:1.3em; margin-bottom:10px; }
-  .auth-form.is-hidden{ display:none; }
+</script>
+<style>
+:root{
+  --bg: #F4F0E2;
+  --bg-deep: #EAE3CE;
+  --surface: #FFFFFF;
+  --ink: #17281F;
+  --ink-soft: #5C6D62;
+  --brand-dark: #0B3D2E;
+  --brand: #12A150;
+  --brand-light: #22D06E;
+  --line: rgba(20,40,30,0.14);
+  --radius: 18px;
+}
+[data-theme="dark"]{
+  --bg: #0E1911;
+  --bg-deep: #142219;
+  --surface: #17261C;
+  --ink: #EAF3EC;
+  --ink-soft: #93A99B;
+  --brand-dark: #0F5C41;
+  --brand: #1BB865;
+  --brand-light: #35E683;
+  --line: rgba(255,255,255,0.12);
+}
+
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  background: var(--bg);
+  font-family:'Hind Siliguri', sans-serif;
+  color: var(--ink);
+  transition: background 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  padding: 26px 22px 48px;
+  overflow: hidden;
+}
+
+/* decorative corner backdrop */
+.blob{
+  position:absolute; border-radius:50%;
+  background: var(--bg-deep);
+  z-index:0;
+}
+.blob.b1{ width:280px; height:280px; top:-90px; right:-100px; }
+.blob.b2{ width:200px; height:200px; bottom:60px; left:-90px; }
+
+.theme-toggle{
+  position:relative; z-index:1;
+  float:right;
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--line); background: var(--surface);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1.05rem;
+}
+
+.corner-note{
+  position:relative; z-index:1;
+  font-size:0.68rem; letter-spacing:0.14em; line-height:1.6;
+  color: var(--ink-soft); text-transform:uppercase;
+  font-weight:600;
+}
+
+.brandmark{
+  position:relative; z-index:1;
+  text-align:center; margin-top:18px;
+}
+.brandmark img{ width:64px; height:64px; border-radius:16px; }
+.brand-name{
+  font-family:'Fraunces', serif; font-weight:700; font-size:2rem;
+  margin: 12px 0 2px; color: var(--brand-dark);
+}
+[data-theme="dark"] .brand-name{ color: var(--brand-light); }
+.brand-tagline{ color: var(--ink-soft); font-size:0.9rem; margin-bottom:2px; }
+
+.headline{
+  position:relative; z-index:1;
+  text-align:center; margin-top:30px;
+}
+.headline h1{
+  font-family:'Hind Siliguri', sans-serif; font-weight:700;
+  font-size:1.4rem; margin:0 0 6px;
+}
+.headline p{ color: var(--ink-soft); font-size:0.9rem; margin:0; }
+
+.auth-card{
+  position:relative; z-index:1;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 26px 22px;
+  margin-top: 26px;
+  box-shadow: 0 18px 40px rgba(11,61,46,0.10);
+}
+
+.field{ margin-bottom:18px; }
+.field label{ display:block; font-size:0.85rem; color: var(--ink-soft); margin-bottom:7px; font-weight:600; }
+.field-input{
+  display:flex; align-items:center; gap:10px;
+  border:1.5px solid var(--line); border-radius:12px;
+  padding: 12px 14px; background: var(--bg);
+}
+.field-input .ic{ opacity:0.6; font-size:1rem; flex:0 0 auto; }
+.field-input input{
+  border:none; background:none; outline:none; width:100%;
+  font-family:'Hind Siliguri', sans-serif; font-size:1rem; color: var(--ink);
+}
+
+.forgot-row{ text-align:right; margin: -8px 0 18px; }
+.forgot-row a{ font-size:0.8rem; color: var(--brand); text-decoration:none; }
+
+.submit-btn{
+  width:100%; padding:15px 0; border:none; border-radius:999px;
+  background: var(--brand-dark); color:#fff;
+  font-family:'Hind Siliguri', sans-serif; font-weight:600; font-size:1rem;
+  cursor:pointer;
+}
+
+.divider{
+  display:flex; align-items:center; gap:12px;
+  margin:20px 0; color: var(--ink-soft); font-size:0.82rem;
+}
+.divider::before, .divider::after{ content:""; flex:1; height:1px; background: var(--line); }
+
+.google-btn{
+  width:100%; padding:13px 0; border-radius:999px;
+  border:1.5px solid var(--line); background: var(--surface);
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  font-family:'Hind Siliguri', sans-serif; font-size:0.95rem; color: var(--ink);
+  cursor:pointer;
+}
+
+.switch-row{
+  text-align:center; margin-top:20px; font-size:0.88rem; color: var(--ink-soft);
+}
+.switch-row a{ color: var(--brand); font-weight:600; text-decoration:none; }
+
+.auth-error{
+  color:#C0392B; background: rgba(192,57,43,0.08);
+  border-radius:10px; padding:10px 12px; font-size:0.85rem;
+  margin-bottom:14px; display:none;
+}
+.auth-error.show{ display:block; }
+
+.field-name{ display:none; }
+.mode-signup .field-name{ display:block; }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <div class="auth-wrap">
-    <div class="auth-brand">শব্দভাণ্ডার</div>
-    <div class="auth-sub">শেখা শুরু করতে লগইন করো</div>
+<div class="page">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
 
-    <div class="auth-tabs">
-      <button class="auth-tab is-active" data-form="login">লগইন</button>
-      <button class="auth-tab" data-form="signup">নতুন অ্যাকাউন্ট</button>
-    </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="থিম বদলাও">🌙</button>
+  <div class="corner-note">Learn · Grow · Repeat</div>
 
+  <div class="brandmark">
+    <img src="logo.png" alt="VocabX logo">
+    <div class="brand-name">VocabX</div>
+    <div class="brand-tagline">শব্দে গড়ে ওঠে বড় স্বপ্ন</div>
+  </div>
+
+  <div class="headline">
+    <h1 id="headlineTitle">শেখা শুরু করতে লগইন করো</h1>
+    <p id="headlineSub">তোমার শেখার যাত্রা এখান থেকেই শুরু</p>
+  </div>
+
+  <div class="auth-card" id="authCard">
     <p class="auth-error" id="authError"></p>
 
-    <!-- LOGIN -->
-    <form class="auth-form" id="loginForm">
+    <form id="authForm">
+      <div class="field field-name">
+        <label>নাম</label>
+        <div class="field-input">
+          <span class="ic">🧑</span>
+          <input type="text" id="nameInput" placeholder="তোমার নাম লিখো" autocomplete="name">
+        </div>
+      </div>
+
       <div class="field">
         <label>ইমেইল</label>
-        <input type="email" id="loginEmail" required autocomplete="email">
+        <div class="field-input">
+          <span class="ic">✉️</span>
+          <input type="email" id="emailInput" placeholder="তোমার ইমেইল লিখো" required autocomplete="email">
+        </div>
       </div>
+
       <div class="field">
         <label>পাসওয়ার্ড</label>
-        <input type="password" id="loginPassword" required autocomplete="current-password">
+        <div class="field-input">
+          <span class="ic">🔒</span>
+          <input type="password" id="passwordInput" placeholder="তোমার পাসওয়ার্ড লিখো" required autocomplete="current-password" minlength="6">
+        </div>
       </div>
-      <button type="submit" class="primary-btn">লগইন করো</button>
+
+      <div class="forgot-row"><a href="#" id="forgotLink">পাসওয়ার্ড ভুলে গেছো?</a></div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">লগইন করো  →</button>
     </form>
 
-    <!-- SIGNUP -->
-    <form class="auth-form is-hidden" id="signupForm">
-      <div class="field">
-        <label>নাম</label>
-        <input type="text" id="signupName" required autocomplete="name">
-      </div>
-      <div class="field">
-        <label>ইমেইল</label>
-        <input type="email" id="signupEmail" required autocomplete="email">
-      </div>
-      <div class="field">
-        <label>পাসওয়ার্ড (কমপক্ষে ৬ ক্যারেক্টার)</label>
-        <input type="password" id="signupPassword" required autocomplete="new-password" minlength="6">
-      </div>
-      <button type="submit" class="primary-btn">অ্যাকাউন্ট তৈরি করো</button>
-    </form>
+    <div class="divider">অথবা</div>
+    <button class="google-btn" id="googleBtn">
+      <span>🔵</span> Google দিয়ে লগইন করো
+    </button>
+
+    <div class="switch-row" id="switchRow">
+      এখনও অ্যাকাউন্ট নেই? <a href="#" id="switchLink">নতুন অ্যাকাউন্ট তৈরি করো</a>
+    </div>
   </div>
 </div>
 
+<script>
+/* থিম টগল — Firebase থেকে সম্পূর্ণ আলাদা, তাই Firebase লোড না হলেও এটা কাজ করবে */
+(function(){
+  const saved = localStorage.getItem("vocabx_theme") || "light";
+  if (saved === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  window.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("themeToggle");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+})();
+</script>
 <script type="module">
 import { auth, db } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   doc, getDoc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+/* ---- mode switching (login <-> signup) ---- */
+let mode = "login";
+const card = document.getElementById("authCard");
 const errorEl = document.getElementById("authError");
 
-/* ---- tab switching ---- */
-document.querySelectorAll(".auth-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("is-active"));
-    tab.classList.add("is-active");
-    errorEl.textContent = "";
-    const target = tab.dataset.form;
-    document.getElementById("loginForm").classList.toggle("is-hidden", target !== "login");
-    document.getElementById("signupForm").classList.toggle("is-hidden", target !== "signup");
+function setMode(next){
+  mode = next;
+  errorEl.classList.remove("show");
+  card.classList.toggle("mode-signup", mode === "signup");
+  document.getElementById("nameInput").required = (mode === "signup");
+  if (mode === "signup"){
+    document.getElementById("headlineTitle").textContent = "নতুন অ্যাকাউন্ট তৈরি করো";
+    document.getElementById("headlineSub").textContent = "শব্দভাণ্ডার গড়া শুরু করো আজই";
+    document.getElementById("submitBtn").textContent = "অ্যাকাউন্ট তৈরি করো  →";
+    document.getElementById("switchRow").innerHTML = 'অ্যাকাউন্ট আছে? <a href="#" id="switchLink">লগইন করো</a>';
+  } else {
+    document.getElementById("headlineTitle").textContent = "শেখা শুরু করতে লগইন করো";
+    document.getElementById("headlineSub").textContent = "তোমার শেখার যাত্রা এখান থেকেই শুরু";
+    document.getElementById("submitBtn").textContent = "লগইন করো  →";
+    document.getElementById("switchRow").innerHTML = 'এখনও অ্যাকাউন্ট নেই? <a href="#" id="switchLink">নতুন অ্যাকাউন্ট তৈরি করো</a>';
+  }
+  document.getElementById("switchLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    setMode(mode === "login" ? "signup" : "login");
   });
+}
+document.getElementById("switchLink").addEventListener("click", (e) => {
+  e.preventDefault();
+  setMode(mode === "login" ? "signup" : "login");
 });
 
-/* ---- redirect after knowing role ---- */
+/* ---- redirect by role ---- */
 async function redirectByRole(uid){
   const snap = await getDoc(doc(db, "users", uid));
   const role = snap.exists() ? snap.data().role : "user";
-  if (role === "admin"){
-    window.location.href = "admin.html";
-  } else {
-    window.location.href = "index.html";
-  }
+  window.location.href = (role === "admin") ? "admin.html" : "index.html";
 }
 
-/* ---- if already logged in, skip this page ---- */
 onAuthStateChanged(auth, (user) => {
   if (user) redirectByRole(user.uid);
 });
 
-/* ---- login ---- */
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+/* ---- submit ---- */
+document.getElementById("authForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  errorEl.textContent = "";
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
+  errorEl.classList.remove("show");
+  const email = document.getElementById("emailInput").value.trim();
+  const password = document.getElementById("passwordInput").value;
+
   try{
-    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if (mode === "signup"){
+      const name = document.getElementById("nameInput").value.trim();
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        name, email, role: "user",
+        subscriptionActive: false, subscriptionExpiresAt: null,
+        createdAt: serverTimestamp()
+      });
+      window.location.href = "index.html";
+    } else {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await redirectByRole(cred.user.uid);
+    }
+  }catch(err){
+    showError(err.code);
+  }
+});
+
+/* ---- google ---- */
+document.getElementById("googleBtn").addEventListener("click", async () => {
+  errorEl.classList.remove("show");
+  try{
+    const provider = new GoogleAuthProvider();
+    const cred = await signInWithPopup(auth, provider);
+    const snap = await getDoc(doc(db, "users", cred.user.uid));
+    if (!snap.exists()){
+      await setDoc(doc(db, "users", cred.user.uid), {
+        name: cred.user.displayName || "ইউজার",
+        email: cred.user.email,
+        role: "user",
+        subscriptionActive: false, subscriptionExpiresAt: null,
+        createdAt: serverTimestamp()
+      });
+    }
     await redirectByRole(cred.user.uid);
   }catch(err){
-    errorEl.textContent = friendlyError(err.code);
+    showError(err.code);
   }
 });
 
-/* ---- signup ---- */
-document.getElementById("signupForm").addEventListener("submit", async (e) => {
+/* ---- forgot password ---- */
+document.getElementById("forgotLink").addEventListener("click", async (e) => {
   e.preventDefault();
-  errorEl.textContent = "";
-  const name = document.getElementById("signupName").value.trim();
-  const email = document.getElementById("signupEmail").value.trim();
-  const password = document.getElementById("signupPassword").value;
+  const email = document.getElementById("emailInput").value.trim();
+  if (!email){
+    showError("auth/missing-email");
+    return;
+  }
   try{
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "users", cred.user.uid), {
-      name,
-      email,
-      role: "user",
-      subscriptionActive: false,
-      subscriptionExpiresAt: null,
-      createdAt: serverTimestamp()
-    });
-    window.location.href = "index.html";
+    await sendPasswordResetEmail(auth, email);
+    errorEl.textContent = "পাসওয়ার্ড রিসেট লিংক তোমার ইমেইলে পাঠানো হয়েছে।";
+    errorEl.style.color = "var(--brand)";
+    errorEl.style.background = "rgba(18,161,80,0.08)";
+    errorEl.classList.add("show");
   }catch(err){
-    errorEl.textContent = friendlyError(err.code);
+    showError(err.code);
   }
 });
 
-function friendlyError(code){
+function showError(code){
   const map = {
     "auth/invalid-email": "সঠিক ইমেইল দাও।",
+    "auth/missing-email": "রিসেট লিংক পাঠাতে আগে ইমেইল লিখো।",
     "auth/user-not-found": "এই ইমেইলে কোনো অ্যাকাউন্ট নেই।",
     "auth/wrong-password": "পাসওয়ার্ড ভুল হয়েছে।",
     "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।",
     "auth/email-already-in-use": "এই ইমেইলে আগে থেকেই অ্যাকাউন্ট আছে — লগইন করো।",
-    "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।"
+    "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।",
+    "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।"
   };
-  return map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
+  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
+  errorEl.style.color = "#C0392B";
+  errorEl.style.background = "rgba(192,57,43,0.08)";
+  errorEl.classList.add("show");
 }
 </script>
 </body>

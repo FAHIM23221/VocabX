@@ -89,6 +89,8 @@ import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+const MASTERED_AT = 4;
+
 onAuthStateChanged(auth, async (user) => {
   if (!user){
     window.location.href = "login.html";
@@ -102,7 +104,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("profileEmail").textContent = user.email;
   document.getElementById("avatarInitial").textContent = name.trim().charAt(0).toUpperCase();
 
-  loadLocalStats();
+  loadStats(user.uid);
 });
 
 document.getElementById("logoutRow").addEventListener("click", async () => {
@@ -110,22 +112,19 @@ document.getElementById("logoutRow").addEventListener("click", async () => {
   window.location.href = "login.html";
 });
 
-async function loadLocalStats(){
-  const STORAGE_KEY = "vocabo_progress_v1";
-  let progress = { known: {}, streak: 0 };
-  try{
-    progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || progress;
-  }catch(e){}
+async function loadStats(uid){
+  const progSnap = await getDoc(doc(db, "users", uid, "progress", "data"));
+  const prog = progSnap.exists() ? progSnap.data() : { strength: {}, streak: 0 };
 
-  const knownCount = Object.values(progress.known || {}).filter(Boolean).length;
-  document.getElementById("statStreak").textContent = toBn(progress.streak || 0);
+  document.getElementById("statStreak").textContent = toBn(prog.streak || 0);
 
   try{
     const res = await fetch("words.json");
     const words = await res.json();
-    document.getElementById("statWords").textContent = `${toBn(knownCount)} / ${toBn(words.length)}`;
+    const masteredCount = words.filter(w => (prog.strength?.[String(w.id)] || 0) >= MASTERED_AT).length;
+    document.getElementById("statWords").textContent = `${toBn(masteredCount)} / ${toBn(words.length)}`;
   }catch(e){
-    document.getElementById("statWords").textContent = toBn(knownCount);
+    document.getElementById("statWords").textContent = "—";
   }
 }
 

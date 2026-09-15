@@ -173,6 +173,15 @@ body{
   line-height:1.5;
 }
 
+.strength-dots{
+  display:flex; gap:6px; margin-top:16px;
+}
+.strength-dots .dot{
+  width:8px; height:8px; border-radius:50%;
+  background: rgba(255,255,255,0.25);
+}
+.strength-dots .dot.filled{ background: var(--marigold); }
+
 .know-row{
   display:flex;
   gap: 12px;

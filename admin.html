@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>অ্যাডমিন প্যানেল — শব্দভাণ্ডার</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .admin-wrap{ padding: 26px 20px 40px; }
+  .admin-title{ font-family:'Fraunces', serif; font-size:1.6rem; color:var(--indigo); margin-bottom:4px; }
+  .admin-sub{ color:var(--ink-soft); font-size:0.9rem; margin-bottom:24px; }
+  .admin-card{
+    background:#FBF6EA; border:1.5px solid var(--ink); border-radius: var(--radius);
+    box-shadow: 4px 4px 0 var(--indigo); padding: 18px; margin-bottom: 20px;
+  }
+  .admin-card h3{ margin:0 0 4px; font-family:'Hind Siliguri',sans-serif; font-size:1.05rem; }
+  .admin-card .num{ font-family:'Fraunces', serif; font-size:2rem; color:var(--terracotta); }
+  .user-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 12px 4px; border-bottom:1px solid var(--line); font-size:0.92rem;
+  }
+  .user-row:last-child{ border-bottom:none; }
+  .user-row .uname{ font-weight:600; }
+  .user-row .uemail{ color:var(--ink-soft); font-size:0.82rem; }
+  .role-tag{
+    font-size:0.75rem; padding:3px 10px; border-radius:999px;
+    background: var(--paper-deep); color:var(--ink-soft);
+  }
+  .role-tag.admin{ background:var(--indigo); color:#fff; }
+  .empty-note{ color:var(--ink-soft); font-size:0.9rem; text-align:center; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">অ্যাডমিন প্যানেল</div>
+    <div class="stats">
+      <span class="stat" id="adminEmailTag"></span>
+      <button class="stat logout-btn" id="logoutBtn" title="লগআউট">⎋</button>
+    </div>
+  </header>
+
+  <div class="admin-wrap">
+    <p class="admin-title">শব্দভাণ্ডার</p>
+    <p class="admin-sub">ইউজার তালিকা ও পরিসংখ্যান</p>
+
+    <div class="admin-card">
+      <h3>মোট ইউজার</h3>
+      <div class="num" id="totalUsers">০</div>
+    </div>
+
+    <div class="admin-card" id="userListCard">
+      <h3 style="margin-bottom:12px;">ইউজার তালিকা</h3>
+      <div id="userList"><p class="empty-note">লোড হচ্ছে...</p></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){
+    window.location.href = "login.html";
+    return;
+  }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  const role = snap.exists() ? snap.data().role : "user";
+  if (role !== "admin"){
+    // অ্যাডমিন না হলে এখানে থাকার অনুমতি নেই
+    window.location.href = "index.html";
+    return;
+  }
+  document.getElementById("adminEmailTag").textContent = user.email;
+  loadUsers();
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+});
+
+async function loadUsers(){
+  const snap = await getDocs(collection(db, "users"));
+  const listEl = document.getElementById("userList");
+  document.getElementById("totalUsers").textContent = toBn(snap.size);
+
+  if (snap.empty){
+    listEl.innerHTML = '<p class="empty-note">কোনো ইউজার নেই</p>';
+    return;
+  }
+
+  listEl.innerHTML = "";
+  snap.forEach(d => {
+    const u = d.data();
+    const row = document.createElement("div");
+    row.className = "user-row";
+    row.innerHTML = `
+      <div>
+        <div class="uname">${escapeHtml(u.name || "নাম নেই")}</div>
+        <div class="uemail">${escapeHtml(u.email || "")}</div>
+      </div>
+      <span class="role-tag ${u.role === 'admin' ? 'admin' : ''}">${u.role === 'admin' ? 'অ্যাডমিন' : 'ইউজার'}</span>
+    `;
+    listEl.appendChild(row);
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+</script>
+</body>
+</html>

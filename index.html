@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>শব্দভাণ্ডার — ইংরেজি শিখি</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">শব্দভাণ্ডার</div>
+    <div class="stats">
+      <span class="stat streak" id="streakStat">🔥 ০</span>
+      <span class="stat count" id="countStat">০ / ০</span>
+      <button class="stat logout-btn" id="logoutBtn" title="লগআউট">⎋</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab is-active" data-mode="flash">ফ্ল্যাশকার্ড</button>
+    <button class="tab" data-mode="quiz">কুইজ</button>
+  </nav>
+
+  <main class="stage">
+
+    <!-- FLASHCARD MODE -->
+    <section class="view" id="flashView">
+      <div class="deckline" id="flashProgress">শব্দ ১ / ২০</div>
+
+      <div class="card-wrap">
+        <button class="navbtn prev" id="flashPrev" aria-label="আগের শব্দ">‹</button>
+
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-inner">
+            <div class="face front">
+              <span class="pos" id="frontPos">verb</span>
+              <span class="word" id="frontWord">word</span>
+              <span class="tap-hint">অর্থ দেখতে ট্যাপ করো</span>
+            </div>
+            <div class="face back">
+              <span class="bn" id="backBn">অর্থ</span>
+              <span class="example" id="backExample">example sentence</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="navbtn next" id="flashNext" aria-label="পরের শব্দ">›</button>
+      </div>
+
+      <div class="know-row">
+        <button class="know-btn dont" id="btnDontKnow">জানি না</button>
+        <button class="know-btn know" id="btnKnow">জানি ✓</button>
+      </div>
+    </section>
+
+    <!-- QUIZ MODE -->
+    <section class="view is-hidden" id="quizView">
+      <div class="deckline" id="quizProgress">প্রশ্ন ১ / ২০</div>
+
+      <div class="quiz-card">
+        <p class="quiz-q">নিচের শব্দটির বাংলা অর্থ কি?</p>
+        <p class="quiz-word" id="quizWord">word</p>
+
+        <ul class="options" id="quizOptions"></ul>
+
+        <p class="quiz-feedback" id="quizFeedback"></p>
+      </div>
+
+      <button class="primary-btn" id="quizNextBtn">পরের প্রশ্ন →</button>
+    </section>
+
+    <!-- END OF DECK -->
+    <section class="view is-hidden" id="doneView">
+      <div class="done-card">
+        <p class="done-title">এই সেটটি শেষ হয়েছে</p>
+        <p class="done-sub">তুমি <span id="doneScore">০</span> টি শব্দ ঠিক বলেছো</p>
+        <button class="primary-btn" id="restartBtn">আবার শুরু করো</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="auth-guard.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

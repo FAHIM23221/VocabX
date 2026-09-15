@@ -1,0 +1,22 @@
+[
+  { "id": 1, "word": "confuse", "pos": "verb", "bn": "বিভ্রান্ত করা", "example": "Don't let the instructions confuse you.", "level": 1 },
+  { "id": 2, "word": "territory", "pos": "noun", "bn": "এলাকা", "example": "The lion guards its territory fiercely.", "level": 1 },
+  { "id": 3, "word": "weed", "pos": "noun", "bn": "আগাছা", "example": "She pulled the weed out of the garden.", "level": 1 },
+  { "id": 4, "word": "silver", "pos": "noun", "bn": "রূপা", "example": "The ring was made of pure silver.", "level": 1 },
+  { "id": 5, "word": "effect", "pos": "noun", "bn": "প্রভাব", "example": "The medicine had an immediate effect.", "level": 1 },
+  { "id": 6, "word": "harvest", "pos": "verb", "bn": "ফসল তোলা", "example": "Farmers harvest rice in autumn.", "level": 1 },
+  { "id": 7, "word": "generous", "pos": "adjective", "bn": "উদার", "example": "He is generous with his time.", "level": 2 },
+  { "id": 8, "word": "shallow", "pos": "adjective", "bn": "অগভীর", "example": "The pond is shallow near the edge.", "level": 2 },
+  { "id": 9, "word": "journey", "pos": "noun", "bn": "যাত্রা", "example": "Their journey took three long days.", "level": 1 },
+  { "id": 10, "word": "border", "pos": "noun", "bn": "সীমান্ত", "example": "The river marks the border between the two towns.", "level": 2 },
+  { "id": 11, "word": "whisper", "pos": "verb", "bn": "ফিসফিস করা", "example": "She began to whisper so no one would hear.", "level": 2 },
+  { "id": 12, "word": "stubborn", "pos": "adjective", "bn": "একগুঁয়ে", "example": "The stubborn child refused to eat vegetables.", "level": 2 },
+  { "id": 13, "word": "ancient", "pos": "adjective", "bn": "প্রাচীন", "example": "They found ancient coins near the ruins.", "level": 1 },
+  { "id": 14, "word": "fragile", "pos": "adjective", "bn": "ভঙ্গুর", "example": "Handle the glass vase, it's fragile.", "level": 2 },
+  { "id": 15, "word": "harvest moon", "pos": "noun", "bn": "শরতের পূর্ণিমা", "example": "The harvest moon lit up the whole field.", "level": 3 },
+  { "id": 16, "word": "reluctant", "pos": "adjective", "bn": "অনিচ্ছুক", "example": "He was reluctant to leave home.", "level": 3 },
+  { "id": 17, "word": "sturdy", "pos": "adjective", "bn": "মজবুত", "example": "This table is sturdy enough to stand on.", "level": 2 },
+  { "id": 18, "word": "graceful", "pos": "adjective", "bn": "সুন্দর ভঙ্গিমায়", "example": "The dancer moved in a graceful way.", "level": 2 },
+  { "id": 19, "word": "humid", "pos": "adjective", "bn": "আর্দ্র", "example": "Dhaka gets very humid in the monsoon.", "level": 1 },
+  { "id": 20, "word": "curious", "pos": "adjective", "bn": "কৌতূহলী", "example": "The curious cat looked inside the box.", "level": 1 }
+]

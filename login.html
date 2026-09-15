@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>লগইন — শব্দভাণ্ডার</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .auth-wrap{ padding: 60px 24px 40px; max-width:480px; margin:0 auto; }
+  .auth-brand{ font-family:'Fraunces', serif; font-style:italic; font-size:1.9rem; color:var(--indigo); text-align:center; margin-bottom: 6px; }
+  .auth-sub{ text-align:center; color:var(--ink-soft); margin-bottom:32px; font-size:0.92rem; }
+  .auth-tabs{ display:flex; gap:24px; justify-content:center; border-bottom:1px solid var(--line); margin-bottom:28px; }
+  .auth-tab{ background:none; border:none; font-family:'Hind Siliguri',sans-serif; font-size:1rem; color:var(--ink-soft); padding:8px 2px 12px; cursor:pointer; border-bottom:2px solid transparent; }
+  .auth-tab.is-active{ color:var(--indigo); font-weight:600; border-bottom-color:var(--terracotta); }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.85rem; color:var(--ink-soft); margin-bottom:6px; }
+  .field input{
+    width:100%; padding:13px 14px; border-radius:10px; border:1.5px solid var(--line);
+    background:#FBF6EA; font-family:'Hind Siliguri',sans-serif; font-size:1rem; color:var(--ink);
+  }
+  .field input:focus{ outline:none; border-color:var(--indigo); }
+  .auth-error{ color:var(--terracotta); font-size:0.88rem; min-height:1.3em; margin-bottom:10px; }
+  .auth-form.is-hidden{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="auth-wrap">
+    <div class="auth-brand">শব্দভাণ্ডার</div>
+    <div class="auth-sub">শেখা শুরু করতে লগইন করো</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab is-active" data-form="login">লগইন</button>
+      <button class="auth-tab" data-form="signup">নতুন অ্যাকাউন্ট</button>
+    </div>
+
+    <p class="auth-error" id="authError"></p>
+
+    <!-- LOGIN -->
+    <form class="auth-form" id="loginForm">
+      <div class="field">
+        <label>ইমেইল</label>
+        <input type="email" id="loginEmail" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>পাসওয়ার্ড</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="primary-btn">লগইন করো</button>
+    </form>
+
+    <!-- SIGNUP -->
+    <form class="auth-form is-hidden" id="signupForm">
+      <div class="field">
+        <label>নাম</label>
+        <input type="text" id="signupName" required autocomplete="name">
+      </div>
+      <div class="field">
+        <label>ইমেইল</label>
+        <input type="email" id="signupEmail" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>পাসওয়ার্ড (কমপক্ষে ৬ ক্যারেক্টার)</label>
+        <input type="password" id="signupPassword" required autocomplete="new-password" minlength="6">
+      </div>
+      <button type="submit" class="primary-btn">অ্যাকাউন্ট তৈরি করো</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  doc, getDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const errorEl = document.getElementById("authError");
+
+/* ---- tab switching ---- */
+document.querySelectorAll(".auth-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    errorEl.textContent = "";
+    const target = tab.dataset.form;
+    document.getElementById("loginForm").classList.toggle("is-hidden", target !== "login");
+    document.getElementById("signupForm").classList.toggle("is-hidden", target !== "signup");
+  });
+});
+
+/* ---- redirect after knowing role ---- */
+async function redirectByRole(uid){
+  const snap = await getDoc(doc(db, "users", uid));
+  const role = snap.exists() ? snap.data().role : "user";
+  if (role === "admin"){
+    window.location.href = "admin.html";
+  } else {
+    window.location.href = "index.html";
+  }
+}
+
+/* ---- if already logged in, skip this page ---- */
+onAuthStateChanged(auth, (user) => {
+  if (user) redirectByRole(user.uid);
+});
+
+/* ---- login ---- */
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorEl.textContent = "";
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  try{
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    await redirectByRole(cred.user.uid);
+  }catch(err){
+    errorEl.textContent = friendlyError(err.code);
+  }
+});
+
+/* ---- signup ---- */
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorEl.textContent = "";
+  const name = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, "users", cred.user.uid), {
+      name,
+      email,
+      role: "user",
+      subscriptionActive: false,
+      subscriptionExpiresAt: null,
+      createdAt: serverTimestamp()
+    });
+    window.location.href = "index.html";
+  }catch(err){
+    errorEl.textContent = friendlyError(err.code);
+  }
+});
+
+function friendlyError(code){
+  const map = {
+    "auth/invalid-email": "সঠিক ইমেইল দাও।",
+    "auth/user-not-found": "এই ইমেইলে কোনো অ্যাকাউন্ট নেই।",
+    "auth/wrong-password": "পাসওয়ার্ড ভুল হয়েছে।",
+    "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।",
+    "auth/email-already-in-use": "এই ইমেইলে আগে থেকেই অ্যাকাউন্ট আছে — লগইন করো।",
+    "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।"
+  };
+  return map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
+}
+</script>
+</body>
+</html>

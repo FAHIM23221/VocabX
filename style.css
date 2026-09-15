@@ -1,0 +1,263 @@
+:root{
+  --paper: #F3E7D3;
+  --paper-deep: #EADFC7;
+  --ink: #2B2118;
+  --ink-soft: #6b5c49;
+  --indigo: #1F3A5F;
+  --indigo-deep: #16293F;
+  --marigold: #E3A23C;
+  --terracotta: #B5502F;
+  --leaf: #3F7A5D;
+  --line: rgba(43,33,24,0.18);
+  --radius: 14px;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background: var(--indigo-deep);
+  font-family: 'Hind Siliguri', sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+
+.app{
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--paper);
+  display:flex;
+  flex-direction:column;
+}
+
+/* ---- Top bar ---- */
+.topbar{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  padding: 22px 20px 8px;
+}
+.brand{
+  font-family:'Fraunces', serif;
+  font-style:italic;
+  font-size: 1.5rem;
+  color: var(--indigo);
+}
+.stats{ display:flex; align-items:center; gap:14px; font-size:0.92rem; color: var(--ink-soft); }
+.stats .streak{ color: var(--terracotta); font-weight:600; }
+.logout-btn{
+  background:none; border:1px solid var(--line); border-radius:50%;
+  width:28px; height:28px; color: var(--ink-soft); font-size:0.9rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; padding:0;
+}
+.logout-btn:active{ background: var(--paper-deep); }
+
+/* ---- Tabs ---- */
+.tabs{
+  display:flex;
+  gap: 28px;
+  padding: 10px 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.tab{
+  background:none;
+  border:none;
+  font-family:'Hind Siliguri', sans-serif;
+  font-size:1rem;
+  color: var(--ink-soft);
+  padding: 8px 2px 12px;
+  cursor:pointer;
+  border-bottom: 2px solid transparent;
+}
+.tab.is-active{
+  color: var(--indigo);
+  font-weight:600;
+  border-bottom-color: var(--terracotta);
+}
+
+.stage{ flex:1; padding: 24px 20px 40px; }
+.view.is-hidden{ display:none; }
+
+.deckline{
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+  margin-bottom: 14px;
+}
+
+/* ---- Flashcard ---- */
+.card-wrap{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+.navbtn{
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--indigo);
+  font-size: 1.3rem;
+  cursor:pointer;
+}
+.navbtn:active{ background: var(--paper-deep); }
+
+.flashcard{
+  flex:1;
+  height: 300px;
+  perspective: 1200px;
+  cursor:pointer;
+}
+.flashcard-inner{
+  position:relative;
+  width:100%; height:100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(.4,.2,.2,1);
+}
+.flashcard.is-flipped .flashcard-inner{ transform: rotateY(180deg); }
+
+.face{
+  position:absolute; inset:0;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--ink);
+  background: #FBF6EA;
+  backface-visibility: hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+  text-align:center;
+  box-shadow: 4px 4px 0 var(--indigo);
+}
+.face.front::before{
+  content:"";
+  position:absolute;
+  top:14px; left:14px; right:14px;
+  border-top: 1px dashed var(--line);
+}
+.back{ transform: rotateY(180deg); background: var(--indigo); border-color: var(--indigo); box-shadow: 4px 4px 0 var(--terracotta); }
+
+.pos{
+  font-size: 0.78rem;
+  color: var(--terracotta);
+  margin-bottom: 10px;
+}
+.word{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size: 2.4rem;
+  color: var(--ink);
+  line-height:1.1;
+}
+.tap-hint{
+  position:absolute;
+  bottom: 16px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.bn{
+  font-size: 2rem;
+  font-weight:600;
+  color: #FBF6EA;
+  margin-bottom: 14px;
+}
+.example{
+  font-family:'Fraunces', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #E7DCC4;
+  line-height:1.5;
+}
+
+.know-row{
+  display:flex;
+  gap: 12px;
+  margin-top: 22px;
+}
+.know-btn{
+  flex:1;
+  padding: 13px 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  font-family:'Hind Siliguri', sans-serif;
+  font-size: 1rem;
+  cursor:pointer;
+  background: transparent;
+  color: var(--ink);
+}
+.know-btn.know{ background: var(--leaf); border-color: var(--leaf); color:#fff; }
+.know-btn.dont{ color: var(--terracotta); border-color: var(--terracotta); }
+
+/* ---- Quiz ---- */
+.quiz-card{
+  background: #FBF6EA;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  box-shadow: 4px 4px 0 var(--indigo);
+}
+.quiz-q{ margin:0 0 6px; color:var(--ink-soft); font-size:0.95rem; }
+.quiz-word{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size: 2rem;
+  margin: 0 0 20px;
+}
+.options{ list-style:none; margin:0; padding:0; }
+.option{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 13px 4px;
+  border-bottom: 1px solid var(--line);
+  cursor:pointer;
+  font-size: 1.02rem;
+}
+.option:last-child{ border-bottom:none; }
+.option .letter{
+  flex:0 0 auto;
+  width: 26px; height:26px;
+  border-radius:50%;
+  border: 1px solid var(--ink-soft);
+  display:flex; align-items:center; justify-content:center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.option.correct{ color: var(--leaf); font-weight:600; }
+.option.correct .letter{ border-color: var(--leaf); background: var(--leaf); color:#fff; }
+.option.wrong{ color: var(--terracotta); font-weight:600; }
+.option.wrong .letter{ border-color: var(--terracotta); background: var(--terracotta); color:#fff; }
+
+.quiz-feedback{
+  min-height: 1.4em;
+  margin: 14px 0 0;
+  font-size: 0.95rem;
+  color: var(--leaf);
+}
+
+.primary-btn{
+  display:block;
+  width:100%;
+  margin-top: 18px;
+  padding: 15px 0;
+  border-radius: 999px;
+  border: none;
+  background: var(--indigo);
+  color: #fff;
+  font-family:'Hind Siliguri', sans-serif;
+  font-size: 1.02rem;
+  cursor:pointer;
+}
+.primary-btn:disabled{ opacity:0.4; }
+
+/* ---- Done view ---- */
+.done-card{ text-align:center; padding: 60px 10px; }
+.done-title{ font-family:'Fraunces', serif; font-size:1.6rem; margin-bottom:8px; }
+.done-sub{ color: var(--ink-soft); margin-bottom: 24px; }
+
+@media (prefers-reduced-motion: reduce){
+  .flashcard-inner{ transition:none; }
+}

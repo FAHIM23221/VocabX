@@ -50,6 +50,7 @@ body{
   background:none; border:1px solid var(--line); border-radius:50%;
   width:28px; height:28px; color: var(--ink-soft); font-size:0.9rem; cursor:pointer;
   display:flex; align-items:center; justify-content:center; padding:0;
+  text-decoration:none;
 }
 .logout-btn:active{ background: var(--paper-deep); }
 

@@ -85,29 +85,19 @@ body{
 
 .brandmark{
   position:relative; z-index:1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top:40px;
-  margin-bottom: 20px;
+  text-align:center; margin-top:18px;
 }
-.brandmark img{ width:48px; height:48px; border-radius:12px; }
+.brandmark img{ width:64px; height:64px; border-radius:16px; }
 .brand-name{
-  font-family:'Fraunces', serif; font-weight:700; font-size:2.2rem;
-  color: var(--brand-dark);
-  display: flex;
-  align-items: center;
+  font-family:'Fraunces', serif; font-weight:700; font-size:2rem;
+  margin: 12px 0 2px; color: var(--brand-dark);
 }
-.brand-name .x-part {
-  color: var(--brand); /* 'X' এর জন্য আলাদা রঙ */
-}
-[data-theme="dark"] .brand-name{ color: var(--ink); }
-[data-theme="dark"] .brand-name .x-part { color: var(--brand-light); }
+[data-theme="dark"] .brand-name{ color: var(--brand-light); }
+.brand-tagline{ color: var(--ink-soft); font-size:0.9rem; margin-bottom:2px; }
 
 .headline{
   position:relative; z-index:1;
-  text-align:center; margin-top:20px;
+  text-align:center; margin-top:30px;
 }
 .headline h1{
   font-family:'Hind Siliguri', sans-serif; font-weight:700;
@@ -187,7 +177,9 @@ body{
   <div class="corner-note">Learn · Grow · Repeat</div>
 
   <div class="brandmark">
-    <div class="brand-name">Vocab<span class="x-part">X</span></div>
+    <img src="logo.png" alt="VocabX logo">
+    <div class="brand-name">VocabX</div>
+    <div class="brand-tagline">শব্দে গড়ে ওঠে বড় স্বপ্ন</div>
   </div>
 
   <div class="headline">
@@ -340,7 +332,7 @@ document.getElementById("authForm").addEventListener("submit", async (e) => {
       await redirectByRole(cred.user.uid);
     }
   }catch(err){
-    showError(err.code, err.message);
+    showError(err.code);
   }
 });
 
@@ -362,7 +354,7 @@ document.getElementById("googleBtn").addEventListener("click", async () => {
     }
     await redirectByRole(cred.user.uid);
   }catch(err){
-    showError(err.code, err.message);
+    showError(err.code);
   }
 });
 
@@ -381,12 +373,11 @@ document.getElementById("forgotLink").addEventListener("click", async (e) => {
     errorEl.style.background = "rgba(18,161,80,0.08)";
     errorEl.classList.add("show");
   }catch(err){
-    showError(err.code, err.message);
+    showError(err.code);
   }
 });
 
-function showError(code, message){
-  console.error("Firebase Error:", code, message);
+function showError(code){
   const map = {
     "auth/invalid-email": "সঠিক ইমেইল দাও।",
     "auth/missing-email": "রিসেট লিংক পাঠাতে আগে ইমেইল লিখো।",
@@ -397,7 +388,7 @@ function showError(code, message){
     "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।",
     "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।"
   };
-  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো। (" + code + ")";
+  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
   errorEl.style.color = "#C0392B";
   errorEl.style.background = "rgba(192,57,43,0.08)";
   errorEl.classList.add("show");

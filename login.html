@@ -329,8 +329,13 @@ async function redirectByRole(uid){
 
 onAuthStateChanged(auth, async (user) => {
   if (user){
-    await ensureUserDoc(user);
-    await redirectByRole(user.uid);
+    try{
+      await ensureUserDoc(user);
+      await redirectByRole(user.uid);
+    }catch(err){
+      showError(err.code || "unknown");
+      console.error("Post-login error:", err);
+    }
   }
 });
 

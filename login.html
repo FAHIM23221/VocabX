@@ -263,8 +263,7 @@ import { auth, db } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   onAuthStateChanged
@@ -339,12 +338,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-/* ---- explicitly surface any redirect-sign-in error (Google flow returns here) ---- */
-getRedirectResult(auth).catch((err) => {
-  showError(err.code || "unknown");
-  console.error("Google redirect sign-in error:", err);
-});
-
 /* ---- submit ---- */
 document.getElementById("authForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -371,15 +364,17 @@ document.getElementById("authForm").addEventListener("submit", async (e) => {
   }
 });
 
-/* ---- google (redirect flow — more reliable on mobile browsers than popup) ---- */
+/* ---- google (popup — redirect was failing silently, popup surfaces errors immediately) ---- */
 document.getElementById("googleBtn").addEventListener("click", async () => {
   errorEl.classList.remove("show");
   try{
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
-    // এখানে ব্রাউজার Google-এ চলে যাবে; ফিরে এলে onAuthStateChanged বাকি কাজ সামলাবে
+    const cred = await signInWithPopup(auth, provider);
+    await ensureUserDoc(cred.user);
+    await redirectByRole(cred.user.uid);
   }catch(err){
-    showError(err.code);
+    showError(err.code || "unknown");
+    console.error("Google popup sign-in error:", err);
   }
 });
 

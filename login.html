@@ -264,6 +264,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   onAuthStateChanged
@@ -333,6 +334,12 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+/* ---- explicitly surface any redirect-sign-in error (Google flow returns here) ---- */
+getRedirectResult(auth).catch((err) => {
+  showError(err.code || "unknown");
+  console.error("Google redirect sign-in error:", err);
+});
+
 /* ---- submit ---- */
 document.getElementById("authForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -399,9 +406,12 @@ function showError(code){
     "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।",
     "auth/email-already-in-use": "এই ইমেইলে আগে থেকেই অ্যাকাউন্ট আছে — লগইন করো।",
     "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।",
-    "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।"
+    "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।",
+    "auth/unauthorized-domain": "এই ওয়েবসাইট ডোমেইনটা Firebase-এ অনুমোদিত না।",
+    "auth/operation-not-supported-in-this-environment": "এই ব্রাউজার পরিবেশে Google লগইন সমর্থিত না।",
+    "auth/account-exists-with-different-credential": "এই ইমেইলে অন্য পদ্ধতিতে আগেই অ্যাকাউন্ট আছে।"
   };
-  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
+  errorEl.textContent = (map[code] || "কিছু একটা সমস্যা হয়েছে (কোড: " + code + ")");
   errorEl.style.color = "#C0392B";
   errorEl.style.background = "rgba(192,57,43,0.08)";
   errorEl.classList.add("show");

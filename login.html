@@ -85,29 +85,24 @@ body{
 
 .brandmark{
   position:relative; z-index:1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top:40px;
-  margin-bottom: 20px;
+  text-align:center; margin-top:26px;
 }
-.brandmark img{ width:48px; height:48px; border-radius:12px; }
 .brand-name{
-  font-family:'Fraunces', serif; font-weight:700; font-size:2.2rem;
+  display:inline-flex; align-items:baseline; gap:1px;
+  font-family:'Fraunces', serif; font-weight:700; font-size:2.6rem;
   color: var(--brand-dark);
-  display: flex;
-  align-items: center;
 }
-.brand-name .x-part {
-  color: var(--brand); /* 'X' এর জন্য আলাদা রঙ */
+[data-theme="dark"] .brand-name{ color: var(--brand-light); }
+.brand-name .brand-x{
+  height: 0.72em; width:auto;
+  transform: translateY(0.1em);
+  border-radius: 0.08em;
 }
-[data-theme="dark"] .brand-name{ color: var(--ink); }
-[data-theme="dark"] .brand-name .x-part { color: var(--brand-light); }
+.brand-tagline{ color: var(--ink-soft); font-size:0.9rem; margin-top:6px; }
 
 .headline{
   position:relative; z-index:1;
-  text-align:center; margin-top:20px;
+  text-align:center; margin-top:30px;
 }
 .headline h1{
   font-family:'Hind Siliguri', sans-serif; font-weight:700;
@@ -187,7 +182,8 @@ body{
   <div class="corner-note">Learn · Grow · Repeat</div>
 
   <div class="brandmark">
-    <div class="brand-name">Vocab<span class="x-part">X</span></div>
+    <div class="brand-name">Vocab<img src="logo-mark.png" alt="X" class="brand-x"></div>
+    <div class="brand-tagline">শব্দে গড়ে ওঠে বড় স্বপ্ন</div>
   </div>
 
   <div class="headline">
@@ -267,7 +263,7 @@ import { auth, db } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   onAuthStateChanged
@@ -307,6 +303,22 @@ document.getElementById("switchLink").addEventListener("click", (e) => {
   setMode(mode === "login" ? "signup" : "login");
 });
 
+/* ---- ensure Firestore profile exists (email signup, google, redirect-return — all funnel through this) ---- */
+async function ensureUserDoc(user){
+  const ref = doc(db, "users", user.uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()){
+    await setDoc(ref, {
+      name: user.displayName || "ইউজার",
+      email: user.email,
+      role: "user",
+      subscriptionActive: false,
+      subscriptionExpiresAt: null,
+      createdAt: serverTimestamp()
+    });
+  }
+}
+
 /* ---- redirect by role ---- */
 async function redirectByRole(uid){
   const snap = await getDoc(doc(db, "users", uid));
@@ -314,8 +326,11 @@ async function redirectByRole(uid){
   window.location.href = (role === "admin") ? "admin.html" : "index.html";
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (user) redirectByRole(user.uid);
+onAuthStateChanged(auth, async (user) => {
+  if (user){
+    await ensureUserDoc(user);
+    await redirectByRole(user.uid);
+  }
 });
 
 /* ---- submit ---- */
@@ -340,29 +355,19 @@ document.getElementById("authForm").addEventListener("submit", async (e) => {
       await redirectByRole(cred.user.uid);
     }
   }catch(err){
-    showError(err.code, err.message);
+    showError(err.code);
   }
 });
 
-/* ---- google ---- */
+/* ---- google (redirect flow — more reliable on mobile browsers than popup) ---- */
 document.getElementById("googleBtn").addEventListener("click", async () => {
   errorEl.classList.remove("show");
   try{
     const provider = new GoogleAuthProvider();
-    const cred = await signInWithPopup(auth, provider);
-    const snap = await getDoc(doc(db, "users", cred.user.uid));
-    if (!snap.exists()){
-      await setDoc(doc(db, "users", cred.user.uid), {
-        name: cred.user.displayName || "ইউজার",
-        email: cred.user.email,
-        role: "user",
-        subscriptionActive: false, subscriptionExpiresAt: null,
-        createdAt: serverTimestamp()
-      });
-    }
-    await redirectByRole(cred.user.uid);
+    await signInWithRedirect(auth, provider);
+    // এখানে ব্রাউজার Google-এ চলে যাবে; ফিরে এলে onAuthStateChanged বাকি কাজ সামলাবে
   }catch(err){
-    showError(err.code, err.message);
+    showError(err.code);
   }
 });
 
@@ -381,12 +386,11 @@ document.getElementById("forgotLink").addEventListener("click", async (e) => {
     errorEl.style.background = "rgba(18,161,80,0.08)";
     errorEl.classList.add("show");
   }catch(err){
-    showError(err.code, err.message);
+    showError(err.code);
   }
 });
 
-function showError(code, message){
-  console.error("Firebase Error:", code, message);
+function showError(code){
   const map = {
     "auth/invalid-email": "সঠিক ইমেইল দাও।",
     "auth/missing-email": "রিসেট লিংক পাঠাতে আগে ইমেইল লিখো।",
@@ -397,7 +401,7 @@ function showError(code, message){
     "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।",
     "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।"
   };
-  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো। (" + code + ")";
+  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
   errorEl.style.color = "#C0392B";
   errorEl.style.background = "rgba(192,57,43,0.08)";
   errorEl.classList.add("show");

@@ -25,6 +25,13 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "login.html";
     return;
   }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (snap.exists() && snap.data().banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে। সাহায্যের জন্য অ্যাডমিনের সাথে যোগাযোগ করো।");
+    window.location.href = "login.html";
+    return;
+  }
   currentUser = user;
   await init();
 });

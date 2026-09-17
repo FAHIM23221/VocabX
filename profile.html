@@ -99,6 +99,14 @@ onAuthStateChanged(auth, async (user) => {
   }
   const snap = await getDoc(doc(db, "users", user.uid));
   const data = snap.exists() ? snap.data() : {};
+
+  if (data.banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+
   const name = data.name || "ইউজার";
 
   document.getElementById("profileName").textContent = name;

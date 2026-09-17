@@ -266,7 +266,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   doc, getDoc, setDoc, serverTimestamp
@@ -319,11 +320,16 @@ async function ensureUserDoc(user){
   }
 }
 
-/* ---- redirect by role ---- */
+/* ---- redirect by role (also blocks banned accounts) ---- */
 async function redirectByRole(uid){
   const snap = await getDoc(doc(db, "users", uid));
-  const role = snap.exists() ? snap.data().role : "user";
-  window.location.href = (role === "admin") ? "admin.html" : "index.html";
+  const data = snap.exists() ? snap.data() : {};
+  if (data.banned){
+    await signOut(auth);
+    showError("banned");
+    return;
+  }
+  window.location.href = (data.role === "admin") ? "admin.html" : "index.html";
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -409,9 +415,10 @@ function showError(code){
     "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।",
     "auth/unauthorized-domain": "এই ওয়েবসাইট ডোমেইনটা Firebase-এ অনুমোদিত না।",
     "auth/operation-not-supported-in-this-environment": "এই ব্রাউজার পরিবেশে Google লগইন সমর্থিত না।",
-    "auth/account-exists-with-different-credential": "এই ইমেইলে অন্য পদ্ধতিতে আগেই অ্যাকাউন্ট আছে।"
+    "auth/account-exists-with-different-credential": "এই ইমেইলে অন্য পদ্ধতিতে আগেই অ্যাকাউন্ট আছে।",
+    "banned": "তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে। সাহায্যের জন্য অ্যাডমিনের সাথে যোগাযোগ করো।"
   };
-  errorEl.textContent = (map[code] || "কিছু একটা সমস্যা হয়েছে (কোড: " + code + ")");
+  errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";
   errorEl.style.color = "#C0392B";
   errorEl.style.background = "rgba(192,57,43,0.08)";
   errorEl.classList.add("show");

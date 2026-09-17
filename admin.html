@@ -211,6 +211,56 @@
     background: var(--dark-green);
     color: #fff;
   }
+  .role-tag.main-admin {
+    background: linear-gradient(135deg, #C9A227, #E9C25B);
+    color: #3B2E00;
+  }
+  .role-tag.banned {
+    background: #FDEAEA;
+    color: #C0392B;
+  }
+  [data-theme="dark"] .role-tag.banned {
+    background: rgba(192, 57, 43, 0.2);
+    color: #FF8A80;
+  }
+
+  .row-right {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+  }
+  .row-actions {
+    display: flex; gap: 6px;
+  }
+  .mini-btn {
+    font-size: 0.72rem; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--border-color); background: var(--card-bg);
+    color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  }
+  .mini-btn.danger { color: #C0392B; border-color: rgba(192,57,43,0.3); }
+  .mini-btn.promote { color: var(--primary-green); border-color: rgba(18,161,80,0.3); }
+
+  .add-admin-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(11, 61, 46, 0.05);
+  }
+  .add-admin-card h3 {
+    margin: 0 0 12px; font-size: 1rem; color: var(--dark-green); font-family:'Fraunces', serif;
+  }
+  .add-admin-row { display: flex; gap: 10px; }
+  .add-admin-row input {
+    flex: 1; padding: 10px 14px; border-radius: 10px;
+    border: 1.5px solid var(--border-color); background: var(--bg-color);
+    font-family: 'Hind Siliguri', sans-serif; font-size: 0.92rem; color: var(--text-main);
+  }
+  .add-admin-row button {
+    padding: 10px 18px; border-radius: 10px; border: none;
+    background: var(--dark-green); color: #fff; font-weight: 600; cursor: pointer;
+    font-family: 'Hind Siliguri', sans-serif; white-space: nowrap;
+  }
+  .add-admin-note { font-size: 0.78rem; color: var(--text-muted); margin: 10px 0 0; min-height: 1.2em; }
   
   .empty-note {
     color: var(--text-muted);
@@ -292,6 +342,15 @@
     <!-- Add more stat cards here in future if needed (e.g. Pro Users, Active Today) -->
   </div>
 
+  <div class="add-admin-card" id="addAdminCard" style="display:none;">
+    <h3>নতুন অ্যাডমিন যোগ করো</h3>
+    <div class="add-admin-row">
+      <input type="email" id="newAdminEmail" placeholder="ইউজারের ইমেইল লিখো">
+      <button id="makeAdminBtn">অ্যাডমিন বানাও</button>
+    </div>
+    <p class="add-admin-note" id="addAdminNote">যাকে অ্যাডমিন বানাতে চাও তাকে আগে VocabX-এ সাইনআপ করতে হবে।</p>
+  </div>
+
   <div class="user-list-card" id="userListCard">
     <div class="user-list-header">
       <h3>সব ইউজার</h3>
@@ -327,7 +386,13 @@
 <script type="module">
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {
+  doc, getDoc, updateDoc, collection, getDocs, query, where
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const MAIN_ADMIN_EMAIL = "fahim360k@gmail.com";
+let currentUserEmail = "";
+let isMainAdmin = false;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user){
@@ -335,19 +400,66 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   const snap = await getDoc(doc(db, "users", user.uid));
-  const role = snap.exists() ? snap.data().role : "user";
-  if (role !== "admin"){
+  const data = snap.exists() ? snap.data() : {};
+
+  if (data.banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const role = data.role || "user";
+  currentUserEmail = user.email;
+  isMainAdmin = (user.email === MAIN_ADMIN_EMAIL);
+
+  if (role !== "admin" && !isMainAdmin){
     // অ্যাডমিন না হলে এখানে থাকার অনুমতি নেই
     window.location.href = "index.html";
     return;
   }
+
   document.getElementById("adminEmailTag").textContent = user.email;
+  if (isMainAdmin){
+    document.getElementById("addAdminCard").style.display = "block";
+  }
   loadUsers();
 });
 
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "login.html";
+});
+
+/* ---- promote by email (main admin only — also enforced by Firestore rules) ---- */
+document.getElementById("makeAdminBtn").addEventListener("click", async () => {
+  const noteEl = document.getElementById("addAdminNote");
+  const email = document.getElementById("newAdminEmail").value.trim();
+  if (!email){
+    noteEl.textContent = "আগে একটা ইমেইল লিখো।";
+    noteEl.style.color = "#C0392B";
+    return;
+  }
+  noteEl.textContent = "খোঁজা হচ্ছে...";
+  noteEl.style.color = "";
+  try{
+    const q = query(collection(db, "users"), where("email", "==", email));
+    const snap = await getDocs(q);
+    if (snap.empty){
+      noteEl.textContent = "এই ইমেইলে কোনো ইউজার পাওয়া যায়নি — আগে তাকে সাইনআপ করতে হবে।";
+      noteEl.style.color = "#C0392B";
+      return;
+    }
+    const targetDoc = snap.docs[0];
+    await updateDoc(doc(db, "users", targetDoc.id), { role: "admin" });
+    noteEl.textContent = `${email} এখন অ্যাডমিন হয়ে গেছে।`;
+    noteEl.style.color = "var(--primary-green)";
+    document.getElementById("newAdminEmail").value = "";
+    loadUsers();
+  }catch(err){
+    noteEl.textContent = "সমস্যা হয়েছে: " + (err.code || err.message);
+    noteEl.style.color = "#C0392B";
+  }
 });
 
 async function loadUsers(){
@@ -363,8 +475,40 @@ async function loadUsers(){
   listEl.innerHTML = "";
   snap.forEach(d => {
     const u = d.data();
+    const uid = d.id;
     const name = u.name || "নাম নেই";
     const initial = name.trim().charAt(0).toUpperCase();
+    const targetIsMainAdmin = (u.email === MAIN_ADMIN_EMAIL);
+    const isAdminRow = u.role === "admin";
+
+    let roleTagHtml;
+    if (targetIsMainAdmin){
+      roleTagHtml = `<span class="role-tag main-admin">👑 মূল অ্যাডমিন</span>`;
+    } else if (isAdminRow){
+      roleTagHtml = `<span class="role-tag admin">অ্যাডমিন</span>`;
+    } else {
+      roleTagHtml = `<span class="role-tag">ইউজার</span>`;
+    }
+    const bannedTagHtml = u.banned ? `<span class="role-tag banned">ব্যানড</span>` : "";
+
+    let actionsHtml = "";
+    if (!targetIsMainAdmin){
+      const buttons = [];
+      if (isMainAdmin){
+        buttons.push(isAdminRow
+          ? `<button class="mini-btn danger" data-action="demote" data-uid="${uid}">অ্যাডমিন সরাও</button>`
+          : `<button class="mini-btn promote" data-action="promote" data-uid="${uid}">অ্যাডমিন বানাও</button>`);
+      }
+      // মূল অ্যাডমিন এবং সাধারণ অ্যাডমিন উভয়ই ব্যান/আনব্যান করতে পারবে,
+      // কিন্তু অ্যাডমিন আরেকজন অ্যাডমিনকে ব্যান করতে পারবে না — শুধু মূল অ্যাডমিন পারবে
+      if (isMainAdmin || !isAdminRow){
+        buttons.push(u.banned
+          ? `<button class="mini-btn promote" data-action="unban" data-uid="${uid}">আনব্যান করো</button>`
+          : `<button class="mini-btn danger" data-action="ban" data-uid="${uid}">ব্যান করো</button>`);
+      }
+      actionsHtml = `<div class="row-actions">${buttons.join("")}</div>`;
+    }
+
     const row = document.createElement("div");
     row.className = "user-row";
     row.innerHTML = `
@@ -375,11 +519,35 @@ async function loadUsers(){
           <div class="uemail">${escapeHtml(u.email || "")}</div>
         </div>
       </div>
-      <span class="role-tag ${u.role === 'admin' ? 'admin' : ''}">${u.role === 'admin' ? 'অ্যাডমিন' : 'ইউজার'}</span>
+      <div class="row-right">
+        ${roleTagHtml}
+        ${bannedTagHtml}
+        ${actionsHtml}
+      </div>
     `;
     listEl.appendChild(row);
   });
 }
+
+/* ---- row action buttons (event delegation) ---- */
+document.getElementById("userList").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".mini-btn");
+  if (!btn) return;
+  const uid = btn.dataset.uid;
+  const action = btn.dataset.action;
+  btn.disabled = true;
+
+  try{
+    if (action === "promote") await updateDoc(doc(db, "users", uid), { role: "admin" });
+    if (action === "demote") await updateDoc(doc(db, "users", uid), { role: "user" });
+    if (action === "ban") await updateDoc(doc(db, "users", uid), { banned: true });
+    if (action === "unban") await updateDoc(doc(db, "users", uid), { banned: false });
+    loadUsers();
+  }catch(err){
+    alert("সমস্যা হয়েছে: " + (err.code || err.message));
+    btn.disabled = false;
+  }
+});
 
 function escapeHtml(str){
   const div = document.createElement("div");

@@ -153,9 +153,9 @@
 
   .user-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border-color);
     transition: background 0.2s;
   }
@@ -165,15 +165,24 @@
   .user-row:last-child {
     border-bottom: none;
   }
-  
+
+  .user-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
   .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    min-width: 0;
   }
   .user-avatar {
     width: 40px;
     height: 40px;
+    flex: 0 0 auto;
     border-radius: 50%;
     background: var(--primary-green);
     color: white;
@@ -183,29 +192,41 @@
     font-family: 'Fraunces', serif;
     font-size: 1.2rem;
   }
-  
+
   .user-details {
     display: flex;
     flex-direction: column;
+    min-width: 0;
   }
   .user-row .uname {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.98rem;
     color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .user-row .uemail {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  
+
+  .row-tags {
+    display: flex; align-items: center; gap: 6px; flex: 0 0 auto;
+  }
+
   .role-tag {
-    font-size: 0.75rem;
-    padding: 4px 12px;
+    font-size: 0.72rem;
+    padding: 4px 10px;
     border-radius: 999px;
     background: var(--tag-bg);
     color: var(--text-muted);
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
   }
   .role-tag.admin {
     background: var(--dark-green);
@@ -224,19 +245,51 @@
     color: #FF8A80;
   }
 
-  .row-right {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+  .details-btn {
+    align-self: flex-start;
+    font-size: 0.78rem; padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--border-color); background: var(--bg-color);
+    color: var(--dark-green); cursor: pointer; font-weight: 600;
   }
-  .row-actions {
-    display: flex; gap: 6px;
-  }
+
   .mini-btn {
-    font-size: 0.72rem; padding: 5px 10px; border-radius: 999px;
+    font-size: 0.78rem; padding: 8px 14px; border-radius: 999px;
     border: 1px solid var(--border-color); background: var(--card-bg);
     color: var(--text-muted); cursor: pointer; white-space: nowrap;
   }
   .mini-btn.danger { color: #C0392B; border-color: rgba(192,57,43,0.3); }
   .mini-btn.promote { color: var(--primary-green); border-color: rgba(18,161,80,0.3); }
+
+  /* ---- details modal ---- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 50;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-sheet {
+    background: var(--card-bg); border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 24px 22px 30px;
+    max-height: 85vh; overflow-y: auto;
+  }
+  .modal-sheet h3 {
+    font-family:'Fraunces', serif; margin: 0 0 4px; font-size: 1.3rem; color: var(--dark-green);
+  }
+  .modal-sheet .modal-email { color: var(--text-muted); font-size: 0.88rem; margin: 0 0 18px; }
+  .modal-field {
+    display: flex; justify-content: space-between; padding: 9px 0;
+    border-bottom: 1px solid var(--border-color); font-size: 0.9rem;
+  }
+  .modal-field .k { color: var(--text-muted); }
+  .modal-field .v { font-weight: 600; text-align: right; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+  .modal-actions .mini-btn { width: 100%; padding: 12px 0; font-size: 0.9rem; }
+  .modal-close-btn {
+    width: 100%; padding: 12px 0; margin-top: 12px; border-radius: 999px;
+    border: none; background: var(--bg-deep, var(--bg-color)); color: var(--text-muted);
+    font-family: 'Hind Siliguri', sans-serif; font-weight: 600; cursor: pointer;
+  }
+  .modal-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; min-height: 1.1em; }
 
   .add-admin-card {
     background: var(--card-bg);
@@ -362,6 +415,10 @@
 
 </div>
 
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-sheet" id="modalSheet"></div>
+</div>
+
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("vocabx_theme") || "light";
@@ -385,14 +442,15 @@
 
 <script type="module">
 import { auth, db } from "./firebase-config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, updateDoc, collection, getDocs, query, where
+  doc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const MAIN_ADMIN_EMAIL = "fahim360k@gmail.com";
 let currentUserEmail = "";
 let isMainAdmin = false;
+let allUsers = []; // [{uid, ...data}]
 
 onAuthStateChanged(auth, async (user) => {
   if (!user){
@@ -462,20 +520,22 @@ document.getElementById("makeAdminBtn").addEventListener("click", async () => {
   }
 });
 
+/* ---- load + render list ---- */
 async function loadUsers(){
   const snap = await getDocs(collection(db, "users"));
   const listEl = document.getElementById("userList");
   document.getElementById("totalUsers").textContent = toBn(snap.size);
 
-  if (snap.empty){
+  allUsers = [];
+  snap.forEach(d => allUsers.push({ uid: d.id, ...d.data() }));
+
+  if (allUsers.length === 0){
     listEl.innerHTML = '<p class="empty-note">কোনো ইউজার নেই</p>';
     return;
   }
 
   listEl.innerHTML = "";
-  snap.forEach(d => {
-    const u = d.data();
-    const uid = d.id;
+  allUsers.forEach(u => {
     const name = u.name || "নাম নেই";
     const initial = name.trim().charAt(0).toUpperCase();
     const targetIsMainAdmin = (u.email === MAIN_ADMIN_EMAIL);
@@ -491,60 +551,140 @@ async function loadUsers(){
     }
     const bannedTagHtml = u.banned ? `<span class="role-tag banned">ব্যানড</span>` : "";
 
-    let actionsHtml = "";
-    if (!targetIsMainAdmin){
-      const buttons = [];
-      if (isMainAdmin){
-        buttons.push(isAdminRow
-          ? `<button class="mini-btn danger" data-action="demote" data-uid="${uid}">অ্যাডমিন সরাও</button>`
-          : `<button class="mini-btn promote" data-action="promote" data-uid="${uid}">অ্যাডমিন বানাও</button>`);
-      }
-      // মূল অ্যাডমিন এবং সাধারণ অ্যাডমিন উভয়ই ব্যান/আনব্যান করতে পারবে,
-      // কিন্তু অ্যাডমিন আরেকজন অ্যাডমিনকে ব্যান করতে পারবে না — শুধু মূল অ্যাডমিন পারবে
-      if (isMainAdmin || !isAdminRow){
-        buttons.push(u.banned
-          ? `<button class="mini-btn promote" data-action="unban" data-uid="${uid}">আনব্যান করো</button>`
-          : `<button class="mini-btn danger" data-action="ban" data-uid="${uid}">ব্যান করো</button>`);
-      }
-      actionsHtml = `<div class="row-actions">${buttons.join("")}</div>`;
-    }
-
     const row = document.createElement("div");
     row.className = "user-row";
     row.innerHTML = `
-      <div class="user-info">
-        <div class="user-avatar">${initial}</div>
-        <div class="user-details">
-          <div class="uname">${escapeHtml(name)}</div>
-          <div class="uemail">${escapeHtml(u.email || "")}</div>
+      <div class="user-row-top">
+        <div class="user-info">
+          <div class="user-avatar">${initial}</div>
+          <div class="user-details">
+            <div class="uname">${escapeHtml(name)}</div>
+            <div class="uemail">${escapeHtml(u.email || "")}</div>
+          </div>
         </div>
+        <div class="row-tags">${roleTagHtml}${bannedTagHtml}</div>
       </div>
-      <div class="row-right">
-        ${roleTagHtml}
-        ${bannedTagHtml}
-        ${actionsHtml}
-      </div>
+      <button class="details-btn" data-uid="${u.uid}">বিস্তারিত দেখো →</button>
     `;
     listEl.appendChild(row);
   });
 }
 
-/* ---- row action buttons (event delegation) ---- */
-document.getElementById("userList").addEventListener("click", async (e) => {
+/* ---- open details modal ---- */
+document.getElementById("userList").addEventListener("click", (e) => {
+  const btn = e.target.closest(".details-btn");
+  if (!btn) return;
+  openDetails(btn.dataset.uid);
+});
+
+function fmtDate(ts){
+  if (!ts) return "—";
+  try{
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString("bn-BD", { year: "numeric", month: "long", day: "numeric" });
+  }catch(e){ return "—"; }
+}
+
+function openDetails(uid){
+  const u = allUsers.find(x => x.uid === uid);
+  if (!u) return;
+  const targetIsMainAdmin = (u.email === MAIN_ADMIN_EMAIL);
+  const isAdminRow = u.role === "admin";
+  const name = u.name || "নাম নেই";
+
+  const fields = [
+    ["ইমেইল", escapeHtml(u.email || "—")],
+    ["রোল", targetIsMainAdmin ? "👑 মূল অ্যাডমিন" : (isAdminRow ? "অ্যাডমিন" : "ইউজার")],
+    ["স্ট্যাটাস", u.banned ? "ব্যানড" : "সক্রিয়"],
+    ["সাবস্ক্রিপশন", u.subscriptionActive ? "সক্রিয়" : "নেই"],
+    ["যোগ দিয়েছে", fmtDate(u.createdAt)]
+  ];
+
+  let actionsHtml = "";
+  if (!targetIsMainAdmin){
+    const buttons = [];
+    if (isMainAdmin){
+      buttons.push(isAdminRow
+        ? `<button class="mini-btn danger" data-action="demote" data-uid="${uid}">অ্যাডমিন থেকে সরাও</button>`
+        : ``); // প্রমোট শুধু উপরের ইমেইল-ফর্ম দিয়েই হবে, সারি/মোডাল থেকে না
+      buttons.push(`<button class="mini-btn danger" data-action="delete" data-uid="${uid}">ইউজার ডিলিট করো</button>`);
+    }
+    if (isMainAdmin || !isAdminRow){
+      buttons.push(u.banned
+        ? `<button class="mini-btn promote" data-action="unban" data-uid="${uid}">আনব্যান করো</button>`
+        : `<button class="mini-btn danger" data-action="ban" data-uid="${uid}">ব্যান করো</button>`);
+    }
+    buttons.push(`<button class="mini-btn" data-action="reset" data-uid="${uid}">পাসওয়ার্ড রিসেট লিংক পাঠাও</button>`);
+    actionsHtml = buttons.filter(Boolean).join("");
+  }
+
+  const sheet = document.getElementById("modalSheet");
+  sheet.innerHTML = `
+    <h3>${escapeHtml(name)}</h3>
+    <p class="modal-email">${escapeHtml(u.email || "")}</p>
+    ${fields.map(([k,v]) => `<div class="modal-field"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}
+    <div class="modal-actions">${actionsHtml}</div>
+    <p class="modal-note" id="modalNote"></p>
+    <button class="modal-close-btn" id="modalCloseBtn">বন্ধ করো</button>
+  `;
+  document.getElementById("modalOverlay").classList.remove("hidden");
+  document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+}
+
+function closeModal(){
+  document.getElementById("modalOverlay").classList.add("hidden");
+}
+document.getElementById("modalOverlay").addEventListener("click", (e) => {
+  if (e.target.id === "modalOverlay") closeModal();
+});
+
+/* ---- modal action buttons ---- */
+document.getElementById("modalSheet").addEventListener("click", async (e) => {
   const btn = e.target.closest(".mini-btn");
   if (!btn) return;
   const uid = btn.dataset.uid;
   const action = btn.dataset.action;
+  const u = allUsers.find(x => x.uid === uid);
+  const noteEl = document.getElementById("modalNote");
   btn.disabled = true;
 
   try{
-    if (action === "promote") await updateDoc(doc(db, "users", uid), { role: "admin" });
-    if (action === "demote") await updateDoc(doc(db, "users", uid), { role: "user" });
-    if (action === "ban") await updateDoc(doc(db, "users", uid), { banned: true });
-    if (action === "unban") await updateDoc(doc(db, "users", uid), { banned: false });
-    loadUsers();
+    if (action === "demote"){
+      await updateDoc(doc(db, "users", uid), { role: "user" });
+      loadUsers(); closeModal();
+    }
+    if (action === "ban"){
+      await updateDoc(doc(db, "users", uid), { banned: true });
+      loadUsers(); closeModal();
+    }
+    if (action === "unban"){
+      await updateDoc(doc(db, "users", uid), { banned: false });
+      loadUsers(); closeModal();
+    }
+    if (action === "reset"){
+      await sendPasswordResetEmail(auth, u.email);
+      noteEl.textContent = "রিসেট লিংক পাঠানো হয়েছে " + u.email + " ঠিকানায়।";
+      noteEl.style.color = "var(--primary-green)";
+      btn.disabled = false;
+    }
+    if (action === "delete"){
+      const ok = confirm(
+        `${u.email}-কে সত্যিই ডিলিট করবে?\n\n` +
+        `এটা তার নাম ও শেখার প্রোগ্রেস মুছে দেবে এবং তাকে স্থায়ীভাবে ব্যান করে দেবে (নতুন করে সাইনআপ করেও আর ঢুকতে পারবে না)।\n\n` +
+        `তবে Firebase-এর সীমাবদ্ধতার কারণে তার লগইন অ্যাকাউন্ট (ইমেইল/পাসওয়ার্ড) প্রযুক্তিগতভাবে থেকেই যাবে — সেটা মুছতে ভবিষ্যতে আলাদা সেটআপ লাগবে।`
+      );
+      if (!ok){ btn.disabled = false; return; }
+      await updateDoc(doc(db, "users", uid), {
+        banned: true,
+        deleted: true,
+        name: "মুছে ফেলা অ্যাকাউন্ট"
+      });
+      try{ await deleteDoc(doc(db, "users", uid, "progress", "data")); }catch(e){}
+      loadUsers(); closeModal();
+    }
   }catch(err){
-    alert("সমস্যা হয়েছে: " + (err.code || err.message));
+    noteEl.textContent = "সমস্যা হয়েছে: " + (err.code || err.message);
+    noteEl.style.color = "#C0392B";
     btn.disabled = false;
   }
 });

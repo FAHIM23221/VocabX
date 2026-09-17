@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>হোম — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">VocabX</div>
+    <div class="stats">
+      <a href="profile.html" class="stat logout-btn" title="প্রোফাইল">👤</a>
+    </div>
+  </header>
+
+  <div class="home-wrap">
+    <div class="home-greet">
+      <div>
+        <h1 id="greetName">Hi, ...</h1>
+        <p>আজকের প্র্যাকটিস শুরু করে ফেলো!</p>
+      </div>
+      <div class="home-badges">
+        <span class="streak-pill" id="streakPill">🔥 ০</span>
+      </div>
+    </div>
+
+    <div class="home-hero">
+      <p class="eyebrow">আজকের প্র্যাকটিস</p>
+      <h2>নতুন শব্দ শেখো, পুরনোগুলো ঝালিয়ে নাও</h2>
+      <a href="index.html" class="cta-btn">শুরু করো →</a>
+    </div>
+
+    <div class="home-stats">
+      <div class="home-stat-card">
+        <h3>শব্দ</h3>
+        <div class="stat-line" id="wordStatLine">লোড হচ্ছে...</div>
+        <div class="home-progress-track"><div class="home-progress-fill" id="wordProgressFill" style="width:0%"></div></div>
+      </div>
+      <div class="home-stat-card soon">
+        <h3>বাক্য</h3>
+        <div class="stat-line">শীঘ্রই আসছে</div>
+        <div class="home-progress-track"><div class="home-progress-fill" style="width:0%; background: var(--line);"></div></div>
+      </div>
+    </div>
+
+    <div class="home-premium">
+      <h3>প্রিমিয়াম আনলক করো</h3>
+      <p>সম্পূর্ণ শব্দভাণ্ডার ও ফিচার আনলক করতে যোগাযোগ করো।</p>
+      <button id="premiumBtn">বিস্তারিত জানো</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item is-active"><span class="nav-icon">🏠</span>হোম</a>
+    <a href="index.html" class="nav-item"><span class="nav-icon">📘</span>শব্দ</a>
+    <a href="sentences.html" class="nav-item"><span class="nav-icon">✏️</span>বাক্য</a>
+    <a href="profile.html" class="nav-item"><span class="nav-icon">📈</span>প্রোগ্রেস</a>
+  </nav>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const MASTERED_AT = 4;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){
+    window.location.href = "login.html";
+    return;
+  }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  const data = snap.exists() ? snap.data() : {};
+
+  if (data.banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+
+  document.getElementById("greetName").textContent = "Hi, " + (data.name || "বন্ধু").split(" ")[0];
+  loadStats(user.uid);
+});
+
+document.getElementById("premiumBtn").addEventListener("click", () => {
+  alert("প্রিমিয়াম সাবস্ক্রিপশন সিস্টেম শীঘ্রই আসছে।");
+});
+
+async function loadStats(uid){
+  const progSnap = await getDoc(doc(db, "users", uid, "progress", "data"));
+  const prog = progSnap.exists() ? progSnap.data() : { strength: {}, streak: 0 };
+
+  document.getElementById("streakPill").textContent = "🔥 " + toBn(prog.streak || 0);
+
+  try{
+    const res = await fetch("words.json");
+    const words = await res.json();
+    const mastered = words.filter(w => (prog.strength?.[String(w.id)] || 0) >= MASTERED_AT).length;
+    const pct = words.length ? Math.round((mastered / words.length) * 100) : 0;
+    document.getElementById("wordStatLine").textContent = `${toBn(mastered)} / ${toBn(words.length)} শেখা হয়েছে`;
+    document.getElementById("wordProgressFill").style.width = pct + "%";
+  }catch(e){
+    document.getElementById("wordStatLine").textContent = "—";
+  }
+}
+
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+</script>
+</body>
+</html>

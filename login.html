@@ -329,7 +329,7 @@ async function redirectByRole(uid){
     showError("banned");
     return;
   }
-  window.location.href = (data.role === "admin") ? "admin.html" : "index.html";
+  window.location.href = (data.role === "admin") ? "admin.html" : "home.html";
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -360,7 +360,7 @@ document.getElementById("authForm").addEventListener("submit", async (e) => {
         subscriptionActive: false, subscriptionExpiresAt: null,
         createdAt: serverTimestamp()
       });
-      window.location.href = "index.html";
+      window.location.href = "home.html";
     } else {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       await redirectByRole(cred.user.uid);

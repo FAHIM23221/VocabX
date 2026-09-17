@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>বাক্য — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">VocabX</div>
+  </header>
+
+  <div class="soon-wrap">
+    <div class="icon">✏️</div>
+    <h2>বাক্য গঠন শীঘ্রই আসছে</h2>
+    <p>এই ফিচারটা এখনো তৈরি হচ্ছে — শব্দ শিখতে শিখতে বাক্য বানানো শেখাবে।</p>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item"><span class="nav-icon">🏠</span>হোম</a>
+    <a href="index.html" class="nav-item"><span class="nav-icon">📘</span>শব্দ</a>
+    <a href="sentences.html" class="nav-item is-active"><span class="nav-icon">✏️</span>বাক্য</a>
+    <a href="profile.html" class="nav-item"><span class="nav-icon">📈</span>প্রোগ্রেস</a>
+  </nav>
+</div>
+
+<script type="module">
+import { auth } from "./firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+onAuthStateChanged(auth, (user) => {
+  if (!user) window.location.href = "login.html";
+});
+</script>
+</body>
+</html>

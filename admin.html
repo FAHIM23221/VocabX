@@ -313,6 +313,14 @@
     background: var(--dark-green); color: #fff; font-weight: 600; cursor: pointer;
     font-family: 'Hind Siliguri', sans-serif; white-space: nowrap;
   }
+  .add-admin-row textarea{
+    flex: 1; padding: 10px 14px; border-radius: 10px; resize: vertical; min-height: 60px;
+    border: 1.5px solid var(--border-color); background: var(--bg-color);
+    font-family: 'Hind Siliguri', sans-serif; font-size: 0.92rem; color: var(--text-main);
+  }
+  .notice-toggle-row{
+    display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.88rem; color: var(--text-muted);
+  }
   .add-admin-note { font-size: 0.78rem; color: var(--text-muted); margin: 10px 0 0; min-height: 1.2em; }
   
   .empty-note {
@@ -404,6 +412,21 @@
     <p class="add-admin-note" id="addAdminNote">যাকে অ্যাডমিন বানাতে চাও তাকে আগে VocabX-এ সাইনআপ করতে হবে।</p>
   </div>
 
+  <div class="add-admin-card">
+    <h3>নোটিশ / রিমাইন্ডার</h3>
+    <div class="add-admin-row">
+      <textarea id="noticeMessage" placeholder="সব ইউজারকে যা দেখাতে চাও তা লিখো..."></textarea>
+    </div>
+    <div class="notice-toggle-row">
+      <input type="checkbox" id="noticeActive">
+      <label for="noticeActive">হোম পেজে দেখানো চালু আছে</label>
+    </div>
+    <div class="add-admin-row" style="margin-top:12px;">
+      <button id="saveNoticeBtn" style="flex:1;">সেভ করো</button>
+    </div>
+    <p class="add-admin-note" id="noticeNote"></p>
+  </div>
+
   <div class="user-list-card" id="userListCard">
     <div class="user-list-header">
       <h3>সব ইউজার</h3>
@@ -444,7 +467,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where
+  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const MAIN_ADMIN_EMAIL = "fahim360k@gmail.com";
@@ -482,6 +505,32 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("addAdminCard").style.display = "block";
   }
   loadUsers();
+  loadNotice();
+});
+
+/* ---- notice / reminder ---- */
+async function loadNotice(){
+  try{
+    const snap = await getDoc(doc(db, "notices", "current"));
+    if (snap.exists()){
+      document.getElementById("noticeMessage").value = snap.data().message || "";
+      document.getElementById("noticeActive").checked = !!snap.data().active;
+    }
+  }catch(e){ /* কোনো নোটিশ এখনো তৈরি হয়নি */ }
+}
+
+document.getElementById("saveNoticeBtn").addEventListener("click", async () => {
+  const noteEl = document.getElementById("noticeNote");
+  const message = document.getElementById("noticeMessage").value.trim();
+  const active = document.getElementById("noticeActive").checked;
+  try{
+    await setDoc(doc(db, "notices", "current"), { message, active });
+    noteEl.textContent = "সেভ হয়ে গেছে।";
+    noteEl.style.color = "var(--primary-green)";
+  }catch(err){
+    noteEl.textContent = "সমস্যা হয়েছে: " + (err.code || err.message);
+    noteEl.style.color = "#C0392B";
+  }
 });
 
 document.getElementById("logoutBtn").addEventListener("click", async () => {

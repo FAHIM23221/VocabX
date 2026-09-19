@@ -159,6 +159,12 @@ body{
   color: var(--ink);
   line-height:1.1;
 }
+.pron{
+  font-family:'Hind Siliguri', sans-serif;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
 .tap-hint{
   position:absolute;
   bottom: 16px;
@@ -371,7 +377,8 @@ body{ padding-bottom: 76px; }
 .notice-banner .bell{ font-size: 1.1rem; flex: 0 0 auto; }
 .notice-banner.is-hidden{ display:none; }
 
-.notice-banner.is-animated{
+.notice-text-area{ flex:1; min-width:0; }
+.notice-banner.is-animated .notice-text-area{
   overflow: hidden;
   white-space: nowrap;
 }
@@ -410,17 +417,18 @@ body{ padding-bottom: 76px; }
 }
 
 /* ---- progress-style stat cards (profile page) ---- */
+.pstat-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px; }
 .pstat-card{
-  display:flex; align-items:center; gap:14px;
+  display:flex; align-items:center; gap:12px;
   background:#FBF6EA; border-radius: var(--radius);
-  padding: 16px 18px; margin-bottom: 12px;
+  padding: 16px 14px; margin-bottom: 0;
   box-shadow: 0 3px 10px rgba(20,40,30,0.06);
 }
 .pstat-icon{
-  width:44px; height:44px; border-radius:50%; flex:0 0 auto;
-  display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+  width:42px; height:42px; border-radius:12px; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center; font-size:1.2rem;
 }
 .pstat-icon.streak{ background:#FDEAE3; }
 .pstat-icon.words{ background:#E9F5EC; }
-.pstat-label{ font-size:0.82rem; color: var(--ink-soft); margin-bottom:2px; }
-.pstat-value{ font-family:'Fraunces', serif; font-weight:700; font-size:1.3rem; color: var(--ink); }
+.pstat-label{ font-size:0.78rem; color: var(--ink-soft); margin-bottom:2px; }
+.pstat-value{ font-family:'Fraunces', serif; font-weight:700; font-size:1.15rem; color: var(--ink); }

@@ -189,6 +189,7 @@ function renderFlashcard(w){
   document.getElementById("flashcard").classList.remove("is-flipped");
   document.getElementById("frontPos").textContent = w.pos;
   document.getElementById("frontWord").textContent = w.word;
+  document.getElementById("frontPron").textContent = w.pron || "";
   document.getElementById("backBn").textContent = w.bn;
   document.getElementById("backExample").textContent = w.example;
   document.getElementById("flashProgress").textContent = `শব্দ ${toBn(flashPointer + 1)}`;

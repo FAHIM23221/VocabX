@@ -413,7 +413,7 @@
   </div>
 
   <div class="add-admin-card">
-    <h3>নোটিশ / রিমাইন্ডার</h3>
+    <h3>রিমাইন্ডার ব্যানার (হোম পেজের উপরে)</h3>
     <div class="add-admin-row">
       <textarea id="noticeMessage" placeholder="সব ইউজারকে যা দেখাতে চাও তা লিখো..."></textarea>
     </div>
@@ -421,10 +421,32 @@
       <input type="checkbox" id="noticeActive">
       <label for="noticeActive">হোম পেজে দেখানো চালু আছে</label>
     </div>
+    <div class="notice-toggle-row">
+      <input type="checkbox" id="noticeAnimated">
+      <label for="noticeAnimated">এক লাইনে স্ক্রল করে দেখানো (অ্যানিমেশন)</label>
+    </div>
     <div class="add-admin-row" style="margin-top:12px;">
       <button id="saveNoticeBtn" style="flex:1;">সেভ করো</button>
     </div>
     <p class="add-admin-note" id="noticeNote"></p>
+  </div>
+
+  <div class="add-admin-card">
+    <h3>পপ-আপ নোটিশ (অ্যাপ খুললেই দেখাবে)</h3>
+    <div class="add-admin-row">
+      <input type="text" id="popupTitle" placeholder="শিরোনাম (যেমন: গুরুত্বপূর্ণ ঘোষণা)">
+    </div>
+    <div class="add-admin-row" style="margin-top:10px;">
+      <textarea id="popupMessage" placeholder="পপ-আপে যা লেখা থাকবে..."></textarea>
+    </div>
+    <div class="notice-toggle-row">
+      <input type="checkbox" id="popupActive">
+      <label for="popupActive">অ্যাপ খুললেই পপ-আপ দেখানো চালু আছে</label>
+    </div>
+    <div class="add-admin-row" style="margin-top:12px;">
+      <button id="savePopupBtn" style="flex:1;">সেভ করো</button>
+    </div>
+    <p class="add-admin-note" id="popupNote"></p>
   </div>
 
   <div class="user-list-card" id="userListCard">
@@ -506,6 +528,7 @@ onAuthStateChanged(auth, async (user) => {
   }
   loadUsers();
   loadNotice();
+  loadPopupNotice();
 });
 
 /* ---- notice / reminder ---- */
@@ -515,6 +538,7 @@ async function loadNotice(){
     if (snap.exists()){
       document.getElementById("noticeMessage").value = snap.data().message || "";
       document.getElementById("noticeActive").checked = !!snap.data().active;
+      document.getElementById("noticeAnimated").checked = !!snap.data().animated;
     }
   }catch(e){ /* কোনো নোটিশ এখনো তৈরি হয়নি */ }
 }
@@ -523,8 +547,36 @@ document.getElementById("saveNoticeBtn").addEventListener("click", async () => {
   const noteEl = document.getElementById("noticeNote");
   const message = document.getElementById("noticeMessage").value.trim();
   const active = document.getElementById("noticeActive").checked;
+  const animated = document.getElementById("noticeAnimated").checked;
   try{
-    await setDoc(doc(db, "notices", "current"), { message, active });
+    await setDoc(doc(db, "notices", "current"), { message, active, animated });
+    noteEl.textContent = "সেভ হয়ে গেছে।";
+    noteEl.style.color = "var(--primary-green)";
+  }catch(err){
+    noteEl.textContent = "সমস্যা হয়েছে: " + (err.code || err.message);
+    noteEl.style.color = "#C0392B";
+  }
+});
+
+/* ---- popup notice ---- */
+async function loadPopupNotice(){
+  try{
+    const snap = await getDoc(doc(db, "notices", "popup"));
+    if (snap.exists()){
+      document.getElementById("popupTitle").value = snap.data().title || "";
+      document.getElementById("popupMessage").value = snap.data().message || "";
+      document.getElementById("popupActive").checked = !!snap.data().active;
+    }
+  }catch(e){ /* কোনো পপ-আপ নোটিশ এখনো তৈরি হয়নি */ }
+}
+
+document.getElementById("savePopupBtn").addEventListener("click", async () => {
+  const noteEl = document.getElementById("popupNote");
+  const title = document.getElementById("popupTitle").value.trim();
+  const message = document.getElementById("popupMessage").value.trim();
+  const active = document.getElementById("popupActive").checked;
+  try{
+    await setDoc(doc(db, "notices", "popup"), { title, message, active });
     noteEl.textContent = "সেভ হয়ে গেছে।";
     noteEl.style.color = "var(--primary-green)";
   }catch(err){

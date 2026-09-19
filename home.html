@@ -23,7 +23,8 @@
   <div class="home-wrap">
     <div class="notice-banner is-hidden" id="noticeBanner">
       <span class="bell">🔔</span>
-      <span id="noticeText"></span>
+      <span id="noticeTextStatic"></span>
+      <span class="marquee-track" id="noticeTextMarquee" style="display:none;"></span>
     </div>
 
     <div class="home-greet">
@@ -70,6 +71,15 @@
   </nav>
 </div>
 
+<div class="popup-notice-overlay is-hidden" id="popupNoticeOverlay">
+  <div class="popup-notice-card">
+    <div class="icon">📢</div>
+    <h3 id="popupNoticeTitle">নোটিশ</h3>
+    <p id="popupNoticeText"></p>
+    <button id="popupNoticeCloseBtn">বুঝেছি</button>
+  </div>
+</div>
+
 <script type="module">
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -95,17 +105,45 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("greetName").textContent = "Hi, " + (data.name || "বন্ধু").split(" ")[0];
   loadStats(user.uid);
   loadNotice();
+  loadPopupNotice();
 });
 
 async function loadNotice(){
   try{
     const snap = await getDoc(doc(db, "notices", "current"));
     if (snap.exists() && snap.data().active && snap.data().message){
-      document.getElementById("noticeText").textContent = snap.data().message;
-      document.getElementById("noticeBanner").classList.remove("is-hidden");
+      const banner = document.getElementById("noticeBanner");
+      const msg = snap.data().message;
+      if (snap.data().animated){
+        banner.classList.add("is-animated");
+        document.getElementById("noticeTextStatic").style.display = "none";
+        const track = document.getElementById("noticeTextMarquee");
+        track.style.display = "inline-block";
+        track.textContent = msg;
+      } else {
+        banner.classList.remove("is-animated");
+        document.getElementById("noticeTextStatic").style.display = "";
+        document.getElementById("noticeTextStatic").textContent = msg;
+        document.getElementById("noticeTextMarquee").style.display = "none";
+      }
+      banner.classList.remove("is-hidden");
     }
   }catch(e){ /* নোটিশ না থাকলে চুপচাপ এড়িয়ে যাও */ }
 }
+
+async function loadPopupNotice(){
+  try{
+    const snap = await getDoc(doc(db, "notices", "popup"));
+    if (snap.exists() && snap.data().active && snap.data().message){
+      document.getElementById("popupNoticeTitle").textContent = snap.data().title || "নোটিশ";
+      document.getElementById("popupNoticeText").textContent = snap.data().message;
+      document.getElementById("popupNoticeOverlay").classList.remove("is-hidden");
+    }
+  }catch(e){ /* পপ-আপ নোটিশ না থাকলে চুপচাপ এড়িয়ে যাও */ }
+}
+document.getElementById("popupNoticeCloseBtn").addEventListener("click", () => {
+  document.getElementById("popupNoticeOverlay").classList.add("is-hidden");
+});
 
 document.getElementById("premiumBtn").addEventListener("click", () => {
   alert("প্রিমিয়াম সাবস্ক্রিপশন সিস্টেম শীঘ্রই আসছে।");

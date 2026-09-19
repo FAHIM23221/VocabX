@@ -65,14 +65,18 @@
       </div>
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-box">
-        <div class="label">🔥 স্ট্রিক</div>
-        <div class="value" id="statStreak">০</div>
+    <div class="pstat-card">
+      <div class="pstat-icon streak">🔥</div>
+      <div>
+        <div class="pstat-label">স্ট্রিক</div>
+        <div class="pstat-value" id="statStreak">০ দিন</div>
       </div>
-      <div class="stat-box">
-        <div class="label">শেখা শব্দ</div>
-        <div class="value" id="statWords">০ / ০</div>
+    </div>
+    <div class="pstat-card">
+      <div class="pstat-icon words">📘</div>
+      <div>
+        <div class="pstat-label">শেখা শব্দ</div>
+        <div class="pstat-value" id="statWords">০ / ০</div>
       </div>
     </div>
 
@@ -132,7 +136,7 @@ async function loadStats(uid){
   const progSnap = await getDoc(doc(db, "users", uid, "progress", "data"));
   const prog = progSnap.exists() ? progSnap.data() : { strength: {}, streak: 0 };
 
-  document.getElementById("statStreak").textContent = toBn(prog.streak || 0);
+  document.getElementById("statStreak").textContent = toBn(prog.streak || 0) + " দিন";
 
   try{
     const res = await fetch("words.json");

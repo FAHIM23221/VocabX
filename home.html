@@ -22,10 +22,13 @@
 
   <div class="home-wrap">
     <div class="notice-banner is-hidden" id="noticeBanner">
-      <span class="bell">🔔</span>
-      <div class="notice-text-area">
-        <span id="noticeTextStatic"></span>
-        <span class="marquee-track" id="noticeTextMarquee" style="display:none;"></span>
+      <!-- স্থির মোড: বেল আলাদা, টেক্সট কয়েক লাইনে -->
+      <span class="bell" id="noticeBellStatic">🔔</span>
+      <span id="noticeTextStatic"></span>
+
+      <!-- স্ক্রল মোড: বেল + টেক্সট একসাথে এক লাইনে চলবে -->
+      <div class="marquee-viewport" id="marqueeViewport" style="display:none;">
+        <div class="marquee-track" id="noticeTextMarquee"></div>
       </div>
     </div>
 
@@ -118,19 +121,39 @@ async function loadNotice(){
       const msg = snap.data().message;
       if (snap.data().animated){
         banner.classList.add("is-animated");
+        document.getElementById("noticeBellStatic").style.display = "none";
         document.getElementById("noticeTextStatic").style.display = "none";
-        const track = document.getElementById("noticeTextMarquee");
-        track.style.display = "inline-block";
-        track.textContent = msg;
+        document.getElementById("marqueeViewport").style.display = "block";
+        setupMarquee(msg);
       } else {
         banner.classList.remove("is-animated");
+        document.getElementById("noticeBellStatic").style.display = "";
         document.getElementById("noticeTextStatic").style.display = "";
         document.getElementById("noticeTextStatic").textContent = msg;
-        document.getElementById("noticeTextMarquee").style.display = "none";
+        document.getElementById("marqueeViewport").style.display = "none";
       }
       banner.classList.remove("is-hidden");
     }
   }catch(e){ /* নোটিশ না থাকলে চুপচাপ এড়িয়ে যাও */ }
+}
+
+function setupMarquee(msg){
+  const track = document.getElementById("noticeTextMarquee");
+  // বেলসহ পুরো লেখা একসাথে — দুইবার বসানো হচ্ছে যাতে লুপ নিরবচ্ছিন্ন (seamless) হয়
+  track.innerHTML = "";
+  for (let i = 0; i < 2; i++){
+    const copy = document.createElement("span");
+    copy.className = "marquee-copy";
+    copy.textContent = "🔔  " + msg;
+    track.appendChild(copy);
+  }
+  // টেক্সট যত লম্বা, স্ক্রল হতে তত বেশি সময় লাগবে — গতি সবসময় একরকম থাকবে
+  requestAnimationFrame(() => {
+    const singleWidth = track.children[0].getBoundingClientRect().width;
+    const pixelsPerSecond = 55; // পড়ার জন্য আরামদায়ক গতি
+    const duration = Math.max(6, singleWidth / pixelsPerSecond);
+    track.style.animationDuration = duration + "s";
+  });
 }
 
 async function loadPopupNotice(){

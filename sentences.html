@@ -9,12 +9,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
 </head>
 <body>
 
 <div class="app">
   <header class="topbar">
     <div class="brand-lockup">Vocab<img src="logo-mark.png" alt="X"></div>
+    <div class="stats">
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+    </div>
   </header>
 
   <div class="soon-wrap">
@@ -31,6 +39,25 @@
   </nav>
 </div>
 
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
 <script type="module">
 import { auth } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";

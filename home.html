@@ -9,6 +9,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
 </head>
 <body>
 
@@ -16,6 +21,7 @@
   <header class="topbar">
     <div class="brand-lockup">Vocab<img src="logo-mark.png" alt="X"></div>
     <div class="stats">
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
       <a href="profile.html" class="stat logout-btn" title="প্রোফাইল">👤</a>
     </div>
   </header>
@@ -85,6 +91,25 @@
   </div>
 </div>
 
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
 <script type="module">
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -138,21 +163,35 @@ async function loadNotice(){
 }
 
 function setupMarquee(msg){
+  const viewport = document.getElementById("marqueeViewport");
   const track = document.getElementById("noticeTextMarquee");
-  // বেলসহ পুরো লেখা একসাথে — দুইবার বসানো হচ্ছে যাতে লুপ নিরবচ্ছিন্ন (seamless) হয়
+
+  // একটাই কপি — লাইনটা সম্পূর্ণ একদিকে বেরিয়ে শেষ হবে, তারপর বিরতি, তারপর আবার শুরু
   track.innerHTML = "";
-  for (let i = 0; i < 2; i++){
-    const copy = document.createElement("span");
-    copy.className = "marquee-copy";
-    copy.textContent = "🔔  " + msg;
-    track.appendChild(copy);
-  }
-  // টেক্সট যত লম্বা, স্ক্রল হতে তত বেশি সময় লাগবে — গতি সবসময় একরকম থাকবে
+  const copy = document.createElement("span");
+  copy.className = "marquee-copy";
+  copy.textContent = "🔔  " + msg;
+  track.appendChild(copy);
+
   requestAnimationFrame(() => {
-    const singleWidth = track.children[0].getBoundingClientRect().width;
+    const viewportWidth = viewport.getBoundingClientRect().width;
+    const textWidth = copy.getBoundingClientRect().width;
     const pixelsPerSecond = 55; // পড়ার জন্য আরামদায়ক গতি
-    const duration = Math.max(6, singleWidth / pixelsPerSecond);
-    track.style.animationDuration = duration + "s";
+    const travelDistance = viewportWidth + textWidth; // পুরো ডানদিক থেকে পুরো বাঁদিকে বেরিয়ে যাওয়া পর্যন্ত মোট দূরত্ব
+    const scrollMs = Math.max(3000, (travelDistance / pixelsPerSecond) * 1000);
+    const pauseMs = 1000; // লাইন শেষ হওয়ার পর ১ সেকেন্ড বিরতি
+    const totalMs = scrollMs + pauseMs;
+    const pauseStartPercent = (scrollMs / totalMs) * 100;
+
+    if (track._marqueeAnim) track._marqueeAnim.cancel();
+    track._marqueeAnim = track.animate(
+      [
+        { transform: `translateX(${viewportWidth}px)`, offset: 0 },
+        { transform: `translateX(-${textWidth}px)`, offset: pauseStartPercent / 100 },
+        { transform: `translateX(-${textWidth}px)`, offset: 1 }
+      ],
+      { duration: totalMs, iterations: Infinity, easing: "linear" }
+    );
   });
 }
 

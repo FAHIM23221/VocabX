@@ -1,22 +1,452 @@
 [
-  { "id": 1, "word": "confuse", "pron": "কনফিউজ", "pos": "verb", "bn": "বিভ্রান্ত করা", "example": "Don't let the instructions confuse you.", "level": 1 },
-  { "id": 2, "word": "territory", "pron": "টেরিটরি", "pos": "noun", "bn": "এলাকা", "example": "The lion guards its territory fiercely.", "level": 1 },
-  { "id": 3, "word": "weed", "pron": "উইড", "pos": "noun", "bn": "আগাছা", "example": "She pulled the weed out of the garden.", "level": 1 },
-  { "id": 4, "word": "silver", "pron": "সিলভার", "pos": "noun", "bn": "রূপা", "example": "The ring was made of pure silver.", "level": 1 },
-  { "id": 5, "word": "effect", "pron": "ইফেক্ট", "pos": "noun", "bn": "প্রভাব", "example": "The medicine had an immediate effect.", "level": 1 },
-  { "id": 6, "word": "harvest", "pron": "হার্ভেস্ট", "pos": "verb", "bn": "ফসল তোলা", "example": "Farmers harvest rice in autumn.", "level": 1 },
-  { "id": 7, "word": "generous", "pron": "জেনারাস", "pos": "adjective", "bn": "উদার", "example": "He is generous with his time.", "level": 2 },
-  { "id": 8, "word": "shallow", "pron": "শ্যালো", "pos": "adjective", "bn": "অগভীর", "example": "The pond is shallow near the edge.", "level": 2 },
-  { "id": 9, "word": "journey", "pron": "জার্নি", "pos": "noun", "bn": "যাত্রা", "example": "Their journey took three long days.", "level": 1 },
-  { "id": 10, "word": "border", "pron": "বর্ডার", "pos": "noun", "bn": "সীমান্ত", "example": "The river marks the border between the two towns.", "level": 2 },
-  { "id": 11, "word": "whisper", "pron": "হুইসপার", "pos": "verb", "bn": "ফিসফিস করা", "example": "She began to whisper so no one would hear.", "level": 2 },
-  { "id": 12, "word": "stubborn", "pron": "স্টাবর্ন", "pos": "adjective", "bn": "একগুঁয়ে", "example": "The stubborn child refused to eat vegetables.", "level": 2 },
-  { "id": 13, "word": "ancient", "pron": "এনশিয়েন্ট", "pos": "adjective", "bn": "প্রাচীন", "example": "They found ancient coins near the ruins.", "level": 1 },
-  { "id": 14, "word": "fragile", "pron": "ফ্র্যাজাইল", "pos": "adjective", "bn": "ভঙ্গুর", "example": "Handle the glass vase, it's fragile.", "level": 2 },
-  { "id": 15, "word": "harvest moon", "pron": "হার্ভেস্ট মুন", "pos": "noun", "bn": "শরতের পূর্ণিমা", "example": "The harvest moon lit up the whole field.", "level": 3 },
-  { "id": 16, "word": "reluctant", "pron": "রিলাকট্যান্ট", "pos": "adjective", "bn": "অনিচ্ছুক", "example": "He was reluctant to leave home.", "level": 3 },
-  { "id": 17, "word": "sturdy", "pron": "স্টার্ডি", "pos": "adjective", "bn": "মজবুত", "example": "This table is sturdy enough to stand on.", "level": 2 },
-  { "id": 18, "word": "graceful", "pron": "গ্রেসফুল", "pos": "adjective", "bn": "সুন্দর ভঙ্গিমায়", "example": "The dancer moved in a graceful way.", "level": 2 },
-  { "id": 19, "word": "humid", "pron": "হিউমিড", "pos": "adjective", "bn": "আর্দ্র", "example": "Dhaka gets very humid in the monsoon.", "level": 1 },
-  { "id": 20, "word": "curious", "pron": "কিউরিয়াস", "pos": "adjective", "bn": "কৌতূহলী", "example": "The curious cat looked inside the box.", "level": 1 }
+  {
+    "id": 1,
+    "word": "confuse",
+    "pron": "কনফিউজ",
+    "pos": "verb",
+    "bn": "বিভ্রান্ত করা",
+    "example": "Don't let the instructions confuse you.",
+    "level": 1
+  },
+  {
+    "id": 2,
+    "word": "territory",
+    "pron": "টেরিটরি",
+    "pos": "noun",
+    "bn": "এলাকা",
+    "example": "The lion guards its territory fiercely.",
+    "level": 1
+  },
+  {
+    "id": 3,
+    "word": "weed",
+    "pron": "উইড",
+    "pos": "noun",
+    "bn": "আগাছা",
+    "example": "She pulled the weed out of the garden.",
+    "level": 1
+  },
+  {
+    "id": 4,
+    "word": "silver",
+    "pron": "সিলভার",
+    "pos": "noun",
+    "bn": "রূপা",
+    "example": "The ring was made of pure silver.",
+    "level": 1
+  },
+  {
+    "id": 5,
+    "word": "effect",
+    "pron": "ইফেক্ট",
+    "pos": "noun",
+    "bn": "প্রভাব",
+    "example": "The medicine had an immediate effect.",
+    "level": 1
+  },
+  {
+    "id": 6,
+    "word": "harvest",
+    "pron": "হার্ভেস্ট",
+    "pos": "verb",
+    "bn": "ফসল তোলা",
+    "example": "Farmers harvest rice in autumn.",
+    "level": 1
+  },
+  {
+    "id": 7,
+    "word": "generous",
+    "pron": "জেনারাস",
+    "pos": "adjective",
+    "bn": "উদার",
+    "example": "He is generous with his time.",
+    "level": 2
+  },
+  {
+    "id": 8,
+    "word": "shallow",
+    "pron": "শ্যালো",
+    "pos": "adjective",
+    "bn": "অগভীর",
+    "example": "The pond is shallow near the edge.",
+    "level": 2
+  },
+  {
+    "id": 9,
+    "word": "journey",
+    "pron": "জার্নি",
+    "pos": "noun",
+    "bn": "যাত্রা",
+    "example": "Their journey took three long days.",
+    "level": 1
+  },
+  {
+    "id": 10,
+    "word": "border",
+    "pron": "বর্ডার",
+    "pos": "noun",
+    "bn": "সীমান্ত",
+    "example": "The river marks the border between the two towns.",
+    "level": 2
+  },
+  {
+    "id": 11,
+    "word": "whisper",
+    "pron": "হুইসপার",
+    "pos": "verb",
+    "bn": "ফিসফিস করা",
+    "example": "She began to whisper so no one would hear.",
+    "level": 2
+  },
+  {
+    "id": 12,
+    "word": "stubborn",
+    "pron": "স্টাবর্ন",
+    "pos": "adjective",
+    "bn": "একগুঁয়ে",
+    "example": "The stubborn child refused to eat vegetables.",
+    "level": 2
+  },
+  {
+    "id": 13,
+    "word": "ancient",
+    "pron": "এনশিয়েন্ট",
+    "pos": "adjective",
+    "bn": "প্রাচীন",
+    "example": "They found ancient coins near the ruins.",
+    "level": 1
+  },
+  {
+    "id": 14,
+    "word": "fragile",
+    "pron": "ফ্র্যাজাইল",
+    "pos": "adjective",
+    "bn": "ভঙ্গুর",
+    "example": "Handle the glass vase, it's fragile.",
+    "level": 2
+  },
+  {
+    "id": 15,
+    "word": "harvest moon",
+    "pron": "হার্ভেস্ট মুন",
+    "pos": "noun",
+    "bn": "শরতের পূর্ণিমা",
+    "example": "The harvest moon lit up the whole field.",
+    "level": 3
+  },
+  {
+    "id": 16,
+    "word": "reluctant",
+    "pron": "রিলাকট্যান্ট",
+    "pos": "adjective",
+    "bn": "অনিচ্ছুক",
+    "example": "He was reluctant to leave home.",
+    "level": 3
+  },
+  {
+    "id": 17,
+    "word": "sturdy",
+    "pron": "স্টার্ডি",
+    "pos": "adjective",
+    "bn": "মজবুত",
+    "example": "This table is sturdy enough to stand on.",
+    "level": 2
+  },
+  {
+    "id": 18,
+    "word": "graceful",
+    "pron": "গ্রেসফুল",
+    "pos": "adjective",
+    "bn": "সুন্দর ভঙ্গিমায়",
+    "example": "The dancer moved in a graceful way.",
+    "level": 2
+  },
+  {
+    "id": 19,
+    "word": "humid",
+    "pron": "হিউমিড",
+    "pos": "adjective",
+    "bn": "আর্দ্র",
+    "example": "Dhaka gets very humid in the monsoon.",
+    "level": 1
+  },
+  {
+    "id": 20,
+    "word": "curious",
+    "pron": "কিউরিয়াস",
+    "pos": "adjective",
+    "bn": "কৌতূহলী",
+    "example": "The curious cat looked inside the box.",
+    "level": 1
+  },
+  {
+    "id": 21,
+    "word": "apple",
+    "pron": "অ্যাপল",
+    "pos": "noun",
+    "bn": "আপেল",
+    "example": "She ate a red apple.",
+    "level": 1
+  },
+  {
+    "id": 22,
+    "word": "house",
+    "pron": "হাউজ",
+    "pos": "noun",
+    "bn": "বাড়ি",
+    "example": "They live in a small house.",
+    "level": 1
+  },
+  {
+    "id": 23,
+    "word": "water",
+    "pron": "ওয়াটার",
+    "pos": "noun",
+    "bn": "পানি",
+    "example": "Please drink more water.",
+    "level": 1
+  },
+  {
+    "id": 24,
+    "word": "happy",
+    "pron": "হ্যাপি",
+    "pos": "adjective",
+    "bn": "খুশি",
+    "example": "He looks very happy today.",
+    "level": 1
+  },
+  {
+    "id": 25,
+    "word": "beautiful",
+    "pron": "বিউটিফুল",
+    "pos": "adjective",
+    "bn": "সুন্দর",
+    "example": "The garden looks beautiful.",
+    "level": 1
+  },
+  {
+    "id": 26,
+    "word": "friend",
+    "pron": "ফ্রেন্ড",
+    "pos": "noun",
+    "bn": "বন্ধু",
+    "example": "She is my best friend.",
+    "level": 1
+  },
+  {
+    "id": 27,
+    "word": "school",
+    "pron": "স্কুল",
+    "pos": "noun",
+    "bn": "বিদ্যালয়",
+    "example": "The children go to school every day.",
+    "level": 1
+  },
+  {
+    "id": 28,
+    "word": "money",
+    "pron": "মানি",
+    "pos": "noun",
+    "bn": "টাকা",
+    "example": "He saved a lot of money.",
+    "level": 1
+  },
+  {
+    "id": 29,
+    "word": "family",
+    "pron": "ফ্যামিলি",
+    "pos": "noun",
+    "bn": "পরিবার",
+    "example": "We had dinner with the family.",
+    "level": 1
+  },
+  {
+    "id": 30,
+    "word": "work",
+    "pron": "ওয়ার্ক",
+    "pos": "verb",
+    "bn": "কাজ করা",
+    "example": "She works at a hospital.",
+    "level": 1
+  },
+  {
+    "id": 31,
+    "word": "love",
+    "pron": "লাভ",
+    "pos": "verb",
+    "bn": "ভালোবাসা",
+    "example": "They love each other deeply.",
+    "level": 1
+  },
+  {
+    "id": 32,
+    "word": "strong",
+    "pron": "স্ট্রং",
+    "pos": "adjective",
+    "bn": "শক্তিশালী",
+    "example": "He is a strong man.",
+    "level": 1
+  },
+  {
+    "id": 33,
+    "word": "weak",
+    "pron": "উইক",
+    "pos": "adjective",
+    "bn": "দুর্বল",
+    "example": "The patient felt weak.",
+    "level": 1
+  },
+  {
+    "id": 34,
+    "word": "quick",
+    "pron": "কুইক",
+    "pos": "adjective",
+    "bn": "দ্রুত",
+    "example": "She gave a quick reply.",
+    "level": 1
+  },
+  {
+    "id": 35,
+    "word": "slow",
+    "pron": "স্লো",
+    "pos": "adjective",
+    "bn": "ধীর",
+    "example": "The train was very slow.",
+    "level": 1
+  },
+  {
+    "id": 36,
+    "word": "honest",
+    "pron": "অনেস্ট",
+    "pos": "adjective",
+    "bn": "সৎ",
+    "example": "He is an honest person.",
+    "level": 2
+  },
+  {
+    "id": 37,
+    "word": "lazy",
+    "pron": "লেজি",
+    "pos": "adjective",
+    "bn": "অলস",
+    "example": "The lazy cat slept all day.",
+    "level": 1
+  },
+  {
+    "id": 38,
+    "word": "important",
+    "pron": "ইম্পর্ট্যান্ট",
+    "pos": "adjective",
+    "bn": "গুরুত্বপূর্ণ",
+    "example": "This is an important meeting.",
+    "level": 2
+  },
+  {
+    "id": 39,
+    "word": "decision",
+    "pron": "ডিসিশন",
+    "pos": "noun",
+    "bn": "সিদ্ধান্ত",
+    "example": "She made a wise decision.",
+    "level": 2
+  },
+  {
+    "id": 40,
+    "word": "success",
+    "pron": "সাকসেস",
+    "pos": "noun",
+    "bn": "সাফল্য",
+    "example": "Hard work leads to success.",
+    "level": 2
+  },
+  {
+    "id": 41,
+    "word": "failure",
+    "pron": "ফেইলিউর",
+    "pos": "noun",
+    "bn": "ব্যর্থতা",
+    "example": "Failure teaches valuable lessons.",
+    "level": 2
+  },
+  {
+    "id": 42,
+    "word": "opportunity",
+    "pron": "অপরচুনিটি",
+    "pos": "noun",
+    "bn": "সুযোগ",
+    "example": "This is a great opportunity.",
+    "level": 2
+  },
+  {
+    "id": 43,
+    "word": "problem",
+    "pron": "প্রবলেম",
+    "pos": "noun",
+    "bn": "সমস্যা",
+    "example": "We need to solve this problem.",
+    "level": 1
+  },
+  {
+    "id": 44,
+    "word": "solution",
+    "pron": "সলিউশন",
+    "pos": "noun",
+    "bn": "সমাধান",
+    "example": "They found a good solution.",
+    "level": 2
+  },
+  {
+    "id": 45,
+    "word": "dangerous",
+    "pron": "ডেঞ্জারাস",
+    "pos": "adjective",
+    "bn": "বিপজ্জনক",
+    "example": "That road is very dangerous.",
+    "level": 2
+  },
+  {
+    "id": 46,
+    "word": "safe",
+    "pron": "সেইফ",
+    "pos": "adjective",
+    "bn": "নিরাপদ",
+    "example": "Keep your documents safe.",
+    "level": 1
+  },
+  {
+    "id": 47,
+    "word": "expensive",
+    "pron": "এক্সপেন্সিভ",
+    "pos": "adjective",
+    "bn": "দামি",
+    "example": "This phone is very expensive.",
+    "level": 1
+  },
+  {
+    "id": 48,
+    "word": "cheap",
+    "pron": "চিপ",
+    "pos": "adjective",
+    "bn": "সস্তা",
+    "example": "The market sells cheap vegetables.",
+    "level": 1
+  },
+  {
+    "id": 49,
+    "word": "crowded",
+    "pron": "ক্রাউডেড",
+    "pos": "adjective",
+    "bn": "ভিড়পূর্ণ",
+    "example": "The bus was very crowded.",
+    "level": 2
+  },
+  {
+    "id": 50,
+    "word": "patient",
+    "pron": "পেশেন্ট",
+    "pos": "adjective",
+    "bn": "ধৈর্যশীল",
+    "example": "A teacher must be patient.",
+    "level": 2
+  }
 ]

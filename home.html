@@ -177,18 +177,19 @@ function setupMarquee(msg){
     const viewportWidth = viewport.getBoundingClientRect().width;
     const textWidth = copy.getBoundingClientRect().width;
     const pixelsPerSecond = 55; // পড়ার জন্য আরামদায়ক গতি
-    const travelDistance = viewportWidth + textWidth; // পুরো ডানদিক থেকে পুরো বাঁদিকে বেরিয়ে যাওয়া পর্যন্ত মোট দূরত্ব
+    const travelDistance = viewportWidth + textWidth; // পুরো বাম কিনারা থেকে পুরো ডান কিনারা পেরিয়ে যাওয়া পর্যন্ত মোট দূরত্ব
     const scrollMs = Math.max(3000, (travelDistance / pixelsPerSecond) * 1000);
     const pauseMs = 1000; // লাইন শেষ হওয়ার পর ১ সেকেন্ড বিরতি
     const totalMs = scrollMs + pauseMs;
     const pauseStartPercent = (scrollMs / totalMs) * 100;
 
+    // বাম কিনারার ঠিক বাইরে থেকে শুরু → ডান কিনারার বাইরে দিয়ে বেরিয়ে যাওয়া পর্যন্ত
     if (track._marqueeAnim) track._marqueeAnim.cancel();
     track._marqueeAnim = track.animate(
       [
-        { transform: `translateX(${viewportWidth}px)`, offset: 0 },
-        { transform: `translateX(-${textWidth}px)`, offset: pauseStartPercent / 100 },
-        { transform: `translateX(-${textWidth}px)`, offset: 1 }
+        { transform: `translateX(-${textWidth}px)`, offset: 0 },
+        { transform: `translateX(${viewportWidth}px)`, offset: pauseStartPercent / 100 },
+        { transform: `translateX(${viewportWidth}px)`, offset: 1 }
       ],
       { duration: totalMs, iterations: Infinity, easing: "linear" }
     );

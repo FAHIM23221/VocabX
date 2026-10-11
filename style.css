@@ -96,6 +96,8 @@ body{
   padding: 8px 2px 12px;
   cursor:pointer;
   border-bottom: 2px solid transparent;
+  text-decoration:none;
+  display:inline-block;
 }
 .tab.is-active{
   color: var(--accent-text);
@@ -398,8 +400,13 @@ body{ padding-bottom: 76px; }
 .notice-banner .bell{ font-size: 1.1rem; flex: 0 0 auto; }
 .notice-banner.is-hidden{ display:none; }
 
+/* স্ক্রল মোডে বক্সের নিজের বাম-ডান কিনারাই viewport — কোনো ভেতরের প্যাডিং/কন্টেইনার নেই */
+.notice-banner.is-animated{
+  padding-left: 0;
+  padding-right: 0;
+}
 .marquee-viewport{
-  flex:1; min-width:0; overflow: hidden;
+  flex:1; min-width:0; width:100%; overflow: hidden;
   position: relative;
 }
 .marquee-track{
@@ -452,3 +459,46 @@ body{ padding-bottom: 76px; }
 .pstat-icon.words{ background:#E9F5EC; }
 .pstat-label{ font-size:0.78rem; color: var(--ink-soft); margin-bottom:2px; }
 .pstat-value{ font-family:'Fraunces', serif; font-weight:700; font-size:1.15rem; color: var(--ink); }
+
+/* ---- word matching game ---- */
+.match-wrap{ padding: 18px 20px 24px; }
+.match-progress{
+  font-size:0.85rem; color: var(--ink-soft); margin-bottom:14px; text-align:center;
+}
+.match-columns{ display:flex; gap:10px; }
+.match-col{ flex:1; display:flex; flex-direction:column; gap:10px; min-width:0; }
+.match-card{
+  background: var(--surface); border:1.5px solid var(--ink); border-radius:12px;
+  padding:12px 8px; text-align:center; font-size:0.9rem; cursor:pointer;
+  min-height: 46px; display:flex; align-items:center; justify-content:center;
+  box-shadow: 2px 2px 0 var(--line);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  word-break: break-word;
+}
+.match-card.selected{
+  border-color: var(--indigo); box-shadow: 2px 2px 0 var(--indigo);
+  transform: translateY(-2px); font-weight:600;
+}
+.match-card.correct{
+  border-color: var(--leaf); background: #E9F5EC; color: var(--leaf);
+  box-shadow:none; cursor:default; opacity:0.75;
+}
+.match-card.wrong{
+  border-color: var(--terracotta); background:#FDEAE3; color: var(--terracotta);
+  animation: match-shake 0.4s ease;
+}
+@keyframes match-shake{
+  0%, 100%{ transform: translateX(0); }
+  25%{ transform: translateX(-5px); }
+  75%{ transform: translateX(5px); }
+}
+.match-status{
+  text-align:center; font-size:0.9rem; color: var(--ink-soft); margin: 20px 0 12px; min-height: 1.3em;
+}
+.match-next-btn{
+  width:100%; padding:14px 0; border-radius:999px; border:none;
+  background: var(--indigo); color:#fff; font-weight:600;
+  font-family:'Hind Siliguri', sans-serif; font-size:1rem; cursor:pointer;
+  transition: opacity 0.2s ease;
+}
+.match-next-btn:disabled{ opacity:0.35; cursor:not-allowed; }

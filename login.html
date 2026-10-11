@@ -148,14 +148,6 @@ body{
 }
 .divider::before, .divider::after{ content:""; flex:1; height:1px; background: var(--line); }
 
-.google-btn{
-  width:100%; padding:13px 0; border-radius:999px;
-  border:1.5px solid var(--line); background: var(--surface);
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  font-family:'Hind Siliguri', sans-serif; font-size:0.95rem; color: var(--ink);
-  cursor:pointer;
-}
-
 .switch-row{
   text-align:center; margin-top:20px; font-size:0.88rem; color: var(--ink-soft);
 }
@@ -170,6 +162,8 @@ body{
 
 .field-name{ display:none; }
 .mode-signup .field-name{ display:block; }
+.field-phone{ display:none; }
+.mode-signup .field-phone{ display:block; }
 </style>
 </head>
 <body>
@@ -203,11 +197,19 @@ body{
         </div>
       </div>
 
+      <div class="field field-phone">
+        <label>মোবাইল নম্বর</label>
+        <div class="field-input">
+          <span class="ic">📱</span>
+          <input type="tel" id="phoneInput" placeholder="তোমার মোবাইল নম্বর লিখো" autocomplete="tel">
+        </div>
+      </div>
+
       <div class="field">
-        <label>ইমেইল</label>
+        <label id="identifierLabel">ইমেইল</label>
         <div class="field-input">
           <span class="ic">✉️</span>
-          <input type="email" id="emailInput" placeholder="তোমার ইমেইল লিখো" required autocomplete="email">
+          <input type="text" id="emailInput" placeholder="তোমার ইমেইল লিখো" required autocomplete="username">
         </div>
       </div>
 
@@ -223,11 +225,6 @@ body{
 
       <button type="submit" class="submit-btn" id="submitBtn">লগইন করো  →</button>
     </form>
-
-    <div class="divider">অথবা</div>
-    <button class="google-btn" id="googleBtn">
-      <span>🔵</span> Google দিয়ে লগইন করো
-    </button>
 
     <div class="switch-row" id="switchRow">
       এখনও অ্যাকাউন্ট নেই? <a href="#" id="switchLink">নতুন অ্যাকাউন্ট তৈরি করো</a>
@@ -263,8 +260,6 @@ import { auth, db } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   sendPasswordResetEmail,
   onAuthStateChanged,
   signOut
@@ -283,16 +278,23 @@ function setMode(next){
   errorEl.classList.remove("show");
   card.classList.toggle("mode-signup", mode === "signup");
   document.getElementById("nameInput").required = (mode === "signup");
+  document.getElementById("phoneInput").required = (mode === "signup");
+  const idLabel = document.getElementById("identifierLabel");
+  const idInput = document.getElementById("emailInput");
   if (mode === "signup"){
     document.getElementById("headlineTitle").textContent = "নতুন অ্যাকাউন্ট তৈরি করো";
     document.getElementById("headlineSub").textContent = "শব্দভাণ্ডার গড়া শুরু করো আজই";
     document.getElementById("submitBtn").textContent = "অ্যাকাউন্ট তৈরি করো  →";
     document.getElementById("switchRow").innerHTML = 'অ্যাকাউন্ট আছে? <a href="#" id="switchLink">লগইন করো</a>';
+    idLabel.textContent = "ইমেইল";
+    idInput.placeholder = "তোমার ইমেইল লিখো";
   } else {
     document.getElementById("headlineTitle").textContent = "শেখা শুরু করতে লগইন করো";
     document.getElementById("headlineSub").textContent = "তোমার শেখার যাত্রা এখান থেকেই শুরু";
     document.getElementById("submitBtn").textContent = "লগইন করো  →";
     document.getElementById("switchRow").innerHTML = 'এখনও অ্যাকাউন্ট নেই? <a href="#" id="switchLink">নতুন অ্যাকাউন্ট তৈরি করো</a>';
+    idLabel.textContent = "ইমেইল অথবা মোবাইল নম্বর";
+    idInput.placeholder = "ইমেইল অথবা মোবাইল নম্বর লিখো";
   }
   document.getElementById("switchLink").addEventListener("click", (e) => {
     e.preventDefault();
@@ -303,22 +305,6 @@ document.getElementById("switchLink").addEventListener("click", (e) => {
   e.preventDefault();
   setMode(mode === "login" ? "signup" : "login");
 });
-
-/* ---- ensure Firestore profile exists (email signup, google, redirect-return — all funnel through this) ---- */
-async function ensureUserDoc(user){
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()){
-    await setDoc(ref, {
-      name: user.displayName || "ইউজার",
-      email: user.email,
-      role: "user",
-      subscriptionActive: false,
-      subscriptionExpiresAt: null,
-      createdAt: serverTimestamp()
-    });
-  }
-}
 
 /* ---- redirect by role (also blocks banned accounts) ---- */
 async function redirectByRole(uid){
@@ -335,7 +321,6 @@ async function redirectByRole(uid){
 onAuthStateChanged(auth, async (user) => {
   if (user){
     try{
-      await ensureUserDoc(user);
       await redirectByRole(user.uid);
     }catch(err){
       showError(err.code || "unknown");
@@ -348,21 +333,36 @@ onAuthStateChanged(auth, async (user) => {
 document.getElementById("authForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   errorEl.classList.remove("show");
-  const email = document.getElementById("emailInput").value.trim();
+  const identifier = document.getElementById("emailInput").value.trim();
   const password = document.getElementById("passwordInput").value;
 
   try{
     if (mode === "signup"){
       const name = document.getElementById("nameInput").value.trim();
+      const phone = document.getElementById("phoneInput").value.trim();
+      const email = identifier;
+
+      if (!phone){ showError("missing-phone"); return; }
+
+      const phoneSnap = await getDoc(doc(db, "phoneIndex", phone));
+      if (phoneSnap.exists()){ showError("phone-taken"); return; }
+
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", cred.user.uid), {
-        name, email, role: "user",
+        name, email, phone, role: "user",
         subscriptionActive: false, subscriptionExpiresAt: null,
         createdAt: serverTimestamp()
       });
+      await setDoc(doc(db, "phoneIndex", phone), { email });
       window.location.href = "home.html";
     } else {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
+      let loginEmail = identifier;
+      if (!identifier.includes("@")){
+        const phoneSnap = await getDoc(doc(db, "phoneIndex", identifier));
+        if (!phoneSnap.exists()){ showError("phone-not-found"); return; }
+        loginEmail = phoneSnap.data().email;
+      }
+      const cred = await signInWithEmailAndPassword(auth, loginEmail, password);
       await redirectByRole(cred.user.uid);
     }
   }catch(err){
@@ -370,30 +370,16 @@ document.getElementById("authForm").addEventListener("submit", async (e) => {
   }
 });
 
-/* ---- google (popup — redirect was failing silently, popup surfaces errors immediately) ---- */
-document.getElementById("googleBtn").addEventListener("click", async () => {
-  errorEl.classList.remove("show");
-  try{
-    const provider = new GoogleAuthProvider();
-    const cred = await signInWithPopup(auth, provider);
-    await ensureUserDoc(cred.user);
-    await redirectByRole(cred.user.uid);
-  }catch(err){
-    showError(err.code || "unknown");
-    console.error("Google popup sign-in error:", err);
-  }
-});
-
-/* ---- forgot password ---- */
+/* ---- forgot password (ইমেইল দিয়েই কাজ করে) ---- */
 document.getElementById("forgotLink").addEventListener("click", async (e) => {
   e.preventDefault();
-  const email = document.getElementById("emailInput").value.trim();
-  if (!email){
+  const identifier = document.getElementById("emailInput").value.trim();
+  if (!identifier || !identifier.includes("@")){
     showError("auth/missing-email");
     return;
   }
   try{
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, identifier);
     errorEl.textContent = "পাসওয়ার্ড রিসেট লিংক তোমার ইমেইলে পাঠানো হয়েছে।";
     errorEl.style.color = "var(--brand)";
     errorEl.style.background = "rgba(18,161,80,0.08)";
@@ -406,16 +392,15 @@ document.getElementById("forgotLink").addEventListener("click", async (e) => {
 function showError(code){
   const map = {
     "auth/invalid-email": "সঠিক ইমেইল দাও।",
-    "auth/missing-email": "রিসেট লিংক পাঠাতে আগে ইমেইল লিখো।",
+    "auth/missing-email": "রিসেট লিংক পাঠাতে আগে ইমেইল লিখো (মোবাইল নম্বর দিয়ে রিসেট এখনো সম্ভব না)।",
     "auth/user-not-found": "এই ইমেইলে কোনো অ্যাকাউন্ট নেই।",
     "auth/wrong-password": "পাসওয়ার্ড ভুল হয়েছে।",
-    "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।",
+    "auth/invalid-credential": "তথ্য ভুল হয়েছে — ইমেইল/নম্বর ও পাসওয়ার্ড আবার চেক করো।",
     "auth/email-already-in-use": "এই ইমেইলে আগে থেকেই অ্যাকাউন্ট আছে — লগইন করো।",
     "auth/weak-password": "পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে।",
-    "auth/popup-closed-by-user": "Google লগইন বাতিল হয়েছে।",
-    "auth/unauthorized-domain": "এই ওয়েবসাইট ডোমেইনটা Firebase-এ অনুমোদিত না।",
-    "auth/operation-not-supported-in-this-environment": "এই ব্রাউজার পরিবেশে Google লগইন সমর্থিত না।",
-    "auth/account-exists-with-different-credential": "এই ইমেইলে অন্য পদ্ধতিতে আগেই অ্যাকাউন্ট আছে।",
+    "missing-phone": "মোবাইল নম্বর লিখতে হবে।",
+    "phone-taken": "এই মোবাইল নম্বর দিয়ে আগে থেকেই একটা অ্যাকাউন্ট আছে।",
+    "phone-not-found": "এই মোবাইল নম্বরে কোনো অ্যাকাউন্ট পাওয়া যায়নি।",
     "banned": "তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে। সাহায্যের জন্য অ্যাডমিনের সাথে যোগাযোগ করো।"
   };
   errorEl.textContent = map[code] || "কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।";

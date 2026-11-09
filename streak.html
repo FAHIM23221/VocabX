@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>স্ট্রিক — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color: var(--ink-soft); text-decoration:none; font-size:0.9rem; }
+  .streak-wrap{ padding: 22px 20px 30px; text-align:center; }
+  .streak-flame{ font-size:4.5rem; line-height:1; margin: 10px 0 6px; }
+  .streak-num{
+    font-family:'Fraunces', serif; font-weight:700; font-size:3rem; color: var(--terracotta); margin:10px 0 2px;
+  }
+  .streak-sub{ color: var(--ink-soft); font-size:0.95rem; margin-bottom:28px; }
+  .week-row{
+    display:flex; justify-content:space-between; margin-bottom:10px;
+  }
+  .week-day{ flex:1; text-align:center; }
+  .week-day .label{ font-size:0.78rem; color: var(--ink-soft); margin-bottom:8px; }
+  .week-day .dot{
+    width:34px; height:34px; border-radius:50%; margin:0 auto;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--paper-deep); color: var(--ink-soft); font-size:0.9rem;
+    border: 2px solid transparent;
+  }
+  .week-day.done .dot{ background: var(--terracotta); color:#fff; border-color: var(--terracotta); }
+  .week-day.today .dot{ border-color: var(--terracotta); }
+  .continue-btn{
+    display:block; margin-top:34px; padding:15px 0; border-radius:999px; text-decoration:none;
+    background: var(--leaf); color:#fff; font-weight:700; font-size:1rem;
+    box-shadow: 0 4px 0 rgba(0,0,0,.18);
+  }
+  .streak-note{
+    margin-top: 24px; color: var(--ink-soft); font-size:0.88rem; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="streak-wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <a href="profile.html" class="back-link" style="margin-bottom:0;">← ফিরে যাও</a>
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+    </div>
+
+    <div class="streak-flame">🔥</div>
+    <div class="streak-num" id="streakNum">০</div>
+    <div class="streak-sub">দিনের স্ট্রিক</div>
+
+    <div class="week-row" id="weekRow"></div>
+
+    <p class="streak-note">প্রতিদিন অন্তত একটা লেসন বা কুইজ শেষ করলেই স্ট্রিক বজায় থাকবে। একদিন বাদ পড়লে স্ট্রিক আবার ১ থেকে শুরু হবে।</p>
+
+    <a href="home.html" class="continue-btn" id="continueBtn" style="display:none;">এগিয়ে যাও</a>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const DAY_LABELS = ["রবি","সোম","মঙ্গল","বুধ","বৃহ","শুক্র","শনি"];
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){
+    window.location.href = "login.html";
+    return;
+  }
+  const userSnap = await getDoc(doc(db, "users", user.uid));
+  if (userSnap.exists() && userSnap.data().banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const progSnap = await getDoc(doc(db, "users", user.uid, "progress", "data"));
+  const prog = progSnap.exists() ? progSnap.data() : { streak: 0, practiceDates: [] };
+
+  if (new URLSearchParams(location.search).get("from") === "lesson"){
+    document.getElementById("continueBtn").style.display = "block";
+  }
+  document.getElementById("streakNum").textContent = toBn(prog.streak || 0);
+  renderWeek(prog.practiceDates || []);
+});
+
+function renderWeek(practiceDates){
+  const row = document.getElementById("weekRow");
+  row.innerHTML = "";
+  const now = new Date();
+  const todayIndex = now.getDay(); // 0 = রবি
+  const sunday = new Date(now);
+  sunday.setDate(now.getDate() - todayIndex);
+
+  for (let i = 0; i < 7; i++){
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    const iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    const done = practiceDates.includes(iso);
+    const isToday = (i === todayIndex);
+
+    const col = document.createElement("div");
+    col.className = "week-day" + (done ? " done" : "") + (isToday ? " today" : "");
+    col.innerHTML = `
+      <div class="label">${DAY_LABELS[i]}</div>
+      <div class="dot">${done ? "✓" : ""}</div>
+    `;
+    row.appendChild(col);
+  }
+}
+
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+</script>
+</body>
+</html>

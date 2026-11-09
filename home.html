@@ -44,14 +44,14 @@
         <p>আজকের প্র্যাকটিস শুরু করে ফেলো!</p>
       </div>
       <div class="home-badges">
-        <span class="streak-pill" id="streakPill">🔥 ০</span>
+        <a href="streak.html" class="streak-pill" id="streakPill" style="text-decoration:none;">🔥 ০</a>
       </div>
     </div>
 
     <div class="home-hero">
       <p class="eyebrow">আজকের প্র্যাকটিস</p>
       <h2>নতুন শব্দ শেখো, পুরনোগুলো ঝালিয়ে নাও</h2>
-      <a href="index.html" class="cta-btn">শুরু করো →</a>
+      <a href="lesson.html" class="cta-btn">শুরু করো →</a>
     </div>
 
     <div class="home-stats">
@@ -163,36 +163,38 @@ async function loadNotice(){
 }
 
 function setupMarquee(msg){
-  const viewport = document.getElementById("marqueeViewport");
   const track = document.getElementById("noticeTextMarquee");
+  const GAP = 48; // দুই কপির মধ্যে ফাঁকা জায়গা
 
-  // একটাই কপি — লাইনটা সম্পূর্ণ একদিকে বেরিয়ে শেষ হবে, তারপর বিরতি, তারপর আবার শুরু
+  // দুইটা অভিন্ন কপি পাশাপাশি — একটা ডান দিক দিয়ে বেরিয়ে যাওয়ার সাথে সাথেই
+  // পরেরটা বাম দিক দিয়ে ঢুকে আসে, তাই কোনো ফাঁকা মুহূর্ত চোখে পড়ে না
   track.innerHTML = "";
-  const copy = document.createElement("span");
-  copy.className = "marquee-copy";
-  copy.textContent = "🔔  " + msg;
-  track.appendChild(copy);
+  const copy1 = document.createElement("span");
+  copy1.className = "marquee-copy";
+  copy1.textContent = "🔔  " + msg;
+  const copy2 = copy1.cloneNode(true);
+  copy1.style.marginRight = GAP + "px";
+  track.appendChild(copy1);
+  track.appendChild(copy2);
+
+  if (track._marqueeRAF) cancelAnimationFrame(track._marqueeRAF);
 
   requestAnimationFrame(() => {
-    const viewportWidth = viewport.getBoundingClientRect().width;
-    const textWidth = copy.getBoundingClientRect().width;
-    const pixelsPerSecond = 55; // পড়ার জন্য আরামদায়ক গতি
-    const travelDistance = viewportWidth + textWidth; // পুরো বাম কিনারা থেকে পুরো ডান কিনারা পেরিয়ে যাওয়া পর্যন্ত মোট দূরত্ব
-    const scrollMs = Math.max(3000, (travelDistance / pixelsPerSecond) * 1000);
-    const pauseMs = 1000; // লাইন শেষ হওয়ার পর ১ সেকেন্ড বিরতি
-    const totalMs = scrollMs + pauseMs;
-    const pauseStartPercent = (scrollMs / totalMs) * 100;
+    const cycleWidth = copy1.getBoundingClientRect().width + GAP;
+    const pixelsPerSecond = 55; // পড়ার জন্য আরামদায়ক, স্থির গতি
+    let pos = -cycleWidth; // শুরুতে সম্পূর্ণ বাম দিকে লুকানো থাকবে, তারপর ডানে সরে বাম কিনারা দিয়ে ঢুকবে
+    let lastTs = null;
 
-    // বাম কিনারার ঠিক বাইরে থেকে শুরু → ডান কিনারার বাইরে দিয়ে বেরিয়ে যাওয়া পর্যন্ত
-    if (track._marqueeAnim) track._marqueeAnim.cancel();
-    track._marqueeAnim = track.animate(
-      [
-        { transform: `translateX(-${textWidth}px)`, offset: 0 },
-        { transform: `translateX(${viewportWidth}px)`, offset: pauseStartPercent / 100 },
-        { transform: `translateX(${viewportWidth}px)`, offset: 1 }
-      ],
-      { duration: totalMs, iterations: Infinity, easing: "linear" }
-    );
+    function step(ts){
+      if (lastTs === null) lastTs = ts;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      pos += pixelsPerSecond * dt;
+      if (pos >= 0) pos -= cycleWidth; // ঠিক এক চক্র ঘুরে গেলে নিরবচ্ছিন্নভাবে আবার শুরুতে ফিরে যাও
+      track.style.transform = `translateX(${pos}px)`;
+      track._marqueeRAF = requestAnimationFrame(step);
+    }
+    track._marqueeRAF = requestAnimationFrame(step);
   });
 }
 

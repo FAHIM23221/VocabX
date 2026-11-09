@@ -74,13 +74,13 @@
     </div>
 
     <div class="pstat-grid">
-      <div class="pstat-card">
+      <a href="streak.html" class="pstat-card" style="text-decoration:none; color:inherit;">
         <div class="pstat-icon streak">🔥</div>
         <div>
           <div class="pstat-label">স্ট্রিক</div>
           <div class="pstat-value" id="statStreak">০ দিন</div>
         </div>
-      </div>
+      </a>
       <div class="pstat-card">
         <div class="pstat-icon words">📘</div>
         <div>
@@ -90,7 +90,19 @@
       </div>
     </div>
 
+    <div class="pstat-card" style="margin-bottom:12px;">
+      <div class="pstat-icon words">🎓</div>
+      <div>
+        <div class="pstat-label">সম্পন্ন লেসন</div>
+        <div class="pstat-value" id="statLessons">০ টি</div>
+      </div>
+    </div>
+
     <div class="settings-list">
+      <a class="settings-row" href="bookmarks.html" style="text-decoration:none; color:inherit;">
+        <span>🔖 বুকমার্ক করা শব্দ</span>
+        <span class="arrow">→</span>
+      </a>
       <button class="settings-row" id="logoutRow">
         <span>লগআউট</span>
         <span class="arrow">→</span>
@@ -166,6 +178,7 @@ async function loadStats(uid){
   const prog = progSnap.exists() ? progSnap.data() : { strength: {}, streak: 0 };
 
   document.getElementById("statStreak").textContent = toBn(prog.streak || 0) + " দিন";
+  document.getElementById("statLessons").textContent = toBn(prog.lessonsCompleted || 0) + " টি";
 
   try{
     const res = await fetch("words.json");

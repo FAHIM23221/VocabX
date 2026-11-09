@@ -76,6 +76,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { playCorrectSound, playWrongSound } from "./sounds.js";
 
 const ROUND_SIZE = 5;
 let ALL_WORDS = [];
@@ -124,7 +125,13 @@ function startRound(){
 
 function renderBoard(){
   const leftOrder = [...round].sort(() => Math.random() - 0.5);
-  const rightOrder = [...round].sort(() => Math.random() - 0.5);
+  let rightOrder = [...round].sort(() => Math.random() - 0.5);
+  // ডান পাশের ক্রম বাম পাশের সাথে হুবহু না মিললে ভালো — পজিশন দেখে মেলানো ঠেকাতে
+  if (round.length > 1){
+    for (let t = 0; t < 20 && rightOrder.some((w, i) => w.id === leftOrder[i].id); t++){
+      rightOrder = [...round].sort(() => Math.random() - 0.5);
+    }
+  }
 
   const leftCol = document.getElementById("leftCol");
   const rightCol = document.getElementById("rightCol");
@@ -187,6 +194,7 @@ function onCardClick(side, id, el){
 function evaluateMatch(){
   const l = selectedLeft, r = selectedRight;
   if (l === r){
+    playCorrectSound();
     matched.add(l);
     document.querySelectorAll('.match-card[data-side="left"].selected, .match-card[data-side="right"].selected').forEach(c => {
       c.classList.remove("selected");
@@ -203,6 +211,7 @@ function evaluateMatch(){
       setStatus("দারুন হয়েছে! পরেরটা করো");
     }
   } else {
+    playWrongSound();
     lockInput = true;
     document.querySelectorAll('.match-card[data-side="left"].selected, .match-card[data-side="right"].selected').forEach(c => {
       c.classList.add("wrong");

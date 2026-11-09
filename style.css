@@ -174,6 +174,7 @@ body{
   color: var(--terracotta);
   margin-bottom: 10px;
 }
+.word-row{ display:flex; align-items:center; gap:10px; }
 .word{
   font-family:'Fraunces', serif;
   font-weight:600;
@@ -181,6 +182,12 @@ body{
   color: var(--ink);
   line-height:1.1;
 }
+.pron-btn{
+  background: var(--paper-deep); border:1px solid var(--line); border-radius:50%;
+  width:34px; height:34px; font-size:1rem; cursor:pointer; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center;
+}
+.pron-btn:active{ transform: scale(0.92); }
 .pron{
   font-family:'Hind Siliguri', sans-serif;
   font-size: 1rem;

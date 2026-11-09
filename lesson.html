@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>লেসন — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  body{ padding-bottom:0; }
+  .lesson-app{ padding-bottom: 110px; }
+  .lesson-header{ display:flex; align-items:center; justify-content:space-between; padding:20px 20px 10px; }
+  .lesson-back{ font-size:1.6rem; color: var(--ink); text-decoration:none; width:44px; line-height:1; }
+  .lesson-title{ font-weight:700; font-size:1.05rem; }
+  .lesson-counter{ width:44px; text-align:right; font-weight:700; font-size:1.05rem; }
+
+  .seg-bar{ display:flex; gap:8px; padding:6px 20px 14px; }
+  .seg{ flex:1; height:7px; border-radius:99px; background: var(--paper-deep); transition: background .3s ease; }
+  .seg.on{ background: var(--leaf); }
+
+  .hero-visual{
+    margin:0 20px 14px; border-radius:18px; overflow:hidden; height:180px;
+    background: linear-gradient(135deg, #0B3D2E, #1b7a52);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-visual img{ width:100%; height:100%; object-fit:cover; }
+  .hero-visual .big-word{
+    font-family:'Fraunces', serif; font-size:3rem; font-weight:700;
+    color: rgba(255,255,255,0.92); letter-spacing:.02em; text-align:center; padding:0 12px;
+  }
+
+  .word-card, .sent-card{
+    margin: 0 20px 12px; background: var(--surface); border-radius:16px; padding:16px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    box-shadow: 0 2px 8px rgba(20,40,30,.05);
+  }
+  .word-card .w{ font-size:1.8rem; font-weight:700; font-family:'Fraunces', serif; line-height:1.15; }
+  .word-card .bn{ color: var(--ink-soft); font-size:1.15rem; margin-top:3px; }
+  .word-card .pr{ color: var(--ink-soft); font-size:.85rem; margin-top:2px; }
+  .sent-card .txt{ font-size:1.02rem; line-height:1.55; }
+  .sent-card mark{ background:none; color:#B0237A; font-weight:600; }
+  [data-theme="dark"] .sent-card mark{ color:#FF7AC6; }
+  .sec-label{ margin: 18px 20px 10px; color: var(--ink-soft); font-size:.9rem; }
+  .play-btn{
+    width:44px; height:44px; border-radius:50%; border:none; background: var(--leaf); color:#fff;
+    font-size:1rem; cursor:pointer; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+    transition: transform .12s ease;
+  }
+  .play-btn:active{ transform: scale(.9); }
+
+  .quiz-wrap{ padding: 8px 20px 0; }
+  .status-box{
+    margin: 22px 20px 0; background: var(--surface); border-radius:14px; padding:16px;
+    text-align:center; color: var(--ink-soft); font-size:.95rem; transition: background .25s ease, color .25s ease;
+  }
+  .status-box.good{ background:#E3F4E8; color:#177a3c; }
+  .status-box.bad{ background:#FDE8E3; color:#B5502F; }
+  [data-theme="dark"] .status-box.good{ background: rgba(27,184,101,.15); color:#4fe08a; }
+  [data-theme="dark"] .status-box.bad{ background: rgba(217,105,74,.15); color:#ff9a7e; }
+
+  .lesson-footer{
+    position:fixed; left:0; right:0; bottom:0; max-width:480px; margin:0 auto; z-index:30;
+    padding:12px 20px calc(14px + env(safe-area-inset-bottom)); background: var(--paper);
+    display:flex; gap:10px;
+  }
+  .lbtn{
+    flex:1; padding:15px 0; border:none; border-radius:999px; background: var(--leaf); color:#fff;
+    font-weight:700; font-size:1rem; font-family:'Hind Siliguri', sans-serif; cursor:pointer;
+    box-shadow: 0 4px 0 rgba(0,0,0,.18); transition: opacity .2s ease, transform .1s ease;
+  }
+  .lbtn:active{ transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+  .lbtn:disabled{ opacity:.4; cursor:not-allowed; background:#6f6f6f; }
+  .lbtn.ghost{ background: var(--surface); color: var(--ink); border:1.5px solid var(--line); box-shadow:none; }
+  .bm-btn{
+    width:56px; border-radius:16px; border:1.5px solid var(--line); background: var(--surface);
+    font-size:1.25rem; cursor:pointer; flex:0 0 auto; transition: background .2s ease;
+  }
+  .bm-btn.on{ background:#FFF1C9; border-color: var(--marigold); }
+
+  .result-wrap{ padding: 36px 20px 0; text-align:center; position:relative; overflow:hidden; min-height:70vh; }
+  .result-wrap h2{ font-family:'Fraunces', serif; font-size:2rem; margin:0 0 6px; }
+  .result-wrap .sub{ color: var(--ink-soft); font-size:1.02rem; }
+  .stars{ display:flex; justify-content:center; gap:10px; margin: 28px 0 36px; }
+  .star{ font-size:4rem; animation: star-pop .5s ease backwards; }
+  .star:nth-child(2){ animation-delay:.12s; } .star:nth-child(3){ animation-delay:.24s; }
+  .star.off{ filter: grayscale(1) opacity(.3); }
+  @keyframes star-pop{ from{ transform: scale(0) rotate(-30deg); opacity:0; } to{ transform:none; opacity:1; } }
+  .tiles{ display:flex; gap:10px; }
+  .tile{ flex:1; border-radius:18px; padding:9px 8px 10px; color:#fff; font-weight:700; font-size:.95rem; }
+  .tile .box{ background: var(--surface); color: var(--ink); border-radius:12px; padding:13px 6px; margin-top:8px; font-size:1.25rem; }
+  .tile.new{ background:#7B2FF2; } .tile.ok{ background:#1E9E1E; } .tile.bad{ background:#C23B22; }
+  .confetti{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .confetti i{ position:absolute; top:-16px; width:8px; height:14px; opacity:.95; animation: confetti-fall linear forwards; }
+  @keyframes confetti-fall{ to{ transform: translateY(80vh) rotate(720deg); opacity:.2; } }
+  @media (prefers-reduced-motion: reduce){ .confetti{ display:none; } .star{ animation:none; } }
+
+  .review-card{
+    margin: 0 20px 12px; background: var(--surface); border-radius:16px; padding:16px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; border-left:5px solid #C23B22;
+  }
+  .review-card .w{ font-size:1.3rem; font-weight:700; font-family:'Fraunces', serif; }
+  .review-card .m{ color:#1E9E1E; font-size:1.1rem; margin-top:2px; font-weight:600; }
+  .review-intro{ margin: 6px 20px 16px; color: var(--ink-soft); font-size:.95rem; }
+</style>
+</head>
+<body>
+
+<div class="app lesson-app">
+  <header class="lesson-header">
+    <a href="home.html" class="lesson-back" aria-label="ফিরে যাও">←</a>
+    <div class="lesson-title" id="lessonTitle">নতুন শব্দ শিখো</div>
+    <div class="lesson-counter" id="lessonCounter"></div>
+  </header>
+  <div class="seg-bar" id="segBar"></div>
+  <main id="screen"></main>
+  <footer class="lesson-footer" id="footer"></footer>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { speak, playCorrectSound, playWrongSound } from "./sounds.js";
+
+const LESSON_SIZE = 5;
+
+let uid = null;
+let ALL = [];
+let progress = { strength:{}, streak:0, lastDay:null, practiceDates:[], bookmarks:[], lessonsCompleted:0 };
+let lesson = [];
+let idx = 0;
+
+// কুইজ স্টেট
+let quizWords = [];
+let matched = new Set();
+let selL = null, selR = null, lock = false;
+let wrongFirst = new Set();   // যেসব শব্দে অন্তত একবার ভুল হয়েছে (প্রথম কুইজে)
+let isRepractice = false;
+
+const $ = (id) => document.getElementById(id);
+const screen = $("screen"), footer = $("footer");
+
+/* ---------- auth ---------- */
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (snap.exists() && snap.data().banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+  uid = user.uid;
+  await init();
+});
+
+const progressRef = () => doc(db, "users", uid, "progress", "data");
+
+async function init(){
+  const res = await fetch("words.json");
+  ALL = await res.json();
+  const snap = await getDoc(progressRef());
+  if (snap.exists()){
+    const d = snap.data();
+    progress = {
+      strength: d.strength || {},
+      streak: d.streak || 0,
+      lastDay: d.lastDay || null,
+      practiceDates: Array.isArray(d.practiceDates) ? d.practiceDates : [],
+      bookmarks: Array.isArray(d.bookmarks) ? d.bookmarks : [],
+      lessonsCompleted: d.lessonsCompleted || 0
+    };
+  }
+  lesson = pickLesson();
+  idx = 0;
+  renderLearn();
+}
+
+/* ---------- helpers ---------- */
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function highlight(sentence, word){
+  const re = new RegExp("\\b(" + escRe(word) + "\\w*)", "gi");
+  return esc(sentence).replace(re, "<mark>$1</mark>");
+}
+function getExamples(w){
+  if (Array.isArray(w.examples) && w.examples.length) return w.examples;
+  return w.example ? [w.example] : [];
+}
+function localIso(d){
+  d = d || new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function shuffle(a){
+  const arr = [...a];
+  for (let i = arr.length-1; i > 0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function setHeader(title, counter){
+  $("lessonTitle").textContent = title;
+  $("lessonCounter").textContent = counter || "";
+}
+function renderSegs(filled, total){
+  const bar = $("segBar");
+  bar.innerHTML = "";
+  for (let i = 0; i < total; i++){
+    const s = document.createElement("div");
+    s.className = "seg" + (i < filled ? " on" : "");
+    bar.appendChild(s);
+  }
+}
+function setFooter(html){ footer.innerHTML = html; }
+
+// দুর্বল শব্দ বেশি সম্ভাবনায় আসবে (মাস্টারি সিস্টেমের সাথে সামঞ্জস্যপূর্ণ)
+function pickLesson(){
+  const pool = [...ALL];
+  const out = [];
+  const n = Math.min(LESSON_SIZE, pool.length);
+  while (out.length < n){
+    const weights = pool.map(w => 6 - (progress.strength[String(w.id)] || 0));
+    const total = weights.reduce((a,b) => a+b, 0);
+    let r = Math.random() * total, i = 0;
+    for (; i < pool.length; i++){ r -= weights[i]; if (r <= 0) break; }
+    if (i >= pool.length) i = pool.length - 1;
+    out.push(pool.splice(i, 1)[0]);
+  }
+  return out;
+}
+
+/* ---------- ধাপ ১: শব্দ শেখা ---------- */
+function renderLearn(){
+  const w = lesson[idx];
+  setHeader("নতুন শব্দ শিখো", "");
+  renderSegs(idx + 1, lesson.length);
+  const ex = getExamples(w);
+  const hero = w.image
+    ? `<img src="${esc(w.image)}" alt="${esc(w.word)}">`
+    : `<span class="big-word">${esc(w.word)}</span>`;
+  const sentCard = (s) => `
+    <div class="sent-card">
+      <div class="txt">${highlight(s, w.word)}</div>
+      <button class="play-btn" data-say="${esc(s)}" aria-label="বাক্যটি শোনো">▶</button>
+    </div>`;
+
+  screen.innerHTML = `
+    <div class="hero-visual">${hero}</div>
+    <div class="word-card">
+      <div>
+        <div class="w">${esc(w.word)}</div>
+        <div class="bn">${esc(w.bn)}</div>
+        ${w.pron ? `<div class="pr">${esc(w.pron)}</div>` : ""}
+      </div>
+      <button class="play-btn" data-say="${esc(w.word)}" aria-label="উচ্চারণ শোনো">▶</button>
+    </div>
+    ${ex.length ? sentCard(ex[0]) : ""}
+    ${ex.length > 1 ? `<div class="sec-label">উদাহরণ বাক্য</div>${ex.slice(1).map(sentCard).join("")}` : ""}
+  `;
+
+  const last = idx === lesson.length - 1;
+  const saved = progress.bookmarks.includes(w.id);
+  setFooter(`
+    <button class="lbtn" id="nextBtn">${last ? "কুইজ শুরু করো →" : "পরবর্তী শব্দ →"}</button>
+    <button class="bm-btn ${saved ? "on" : ""}" id="bmBtn" aria-label="বুকমার্ক">${saved ? "🔖" : "🏷️"}</button>
+  `);
+  $("nextBtn").onclick = () => {
+    if (!last){ idx++; renderLearn(); window.scrollTo(0, 0); }
+    else startQuiz(lesson, false);
+  };
+  $("bmBtn").onclick = toggleBookmark;
+  window.scrollTo(0, 0);
+}
+
+async function toggleBookmark(){
+  const w = lesson[idx];
+  const i = progress.bookmarks.indexOf(w.id);
+  if (i === -1) progress.bookmarks.push(w.id); else progress.bookmarks.splice(i, 1);
+  const on = progress.bookmarks.includes(w.id);
+  $("bmBtn").classList.toggle("on", on);
+  $("bmBtn").textContent = on ? "🔖" : "🏷️";
+  try{ await setDoc(progressRef(), { bookmarks: progress.bookmarks }, { merge: true }); }catch(e){ console.error(e); }
+}
+
+// শব্দ বা বাক্যের পাশের ▶ বাটনে উচ্চারণ
+screen.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-say]");
+  if (b) speak(b.dataset.say, "en-US");
+});
+
+/* ---------- ধাপ ২: শব্দ মিলকরণ কুইজ ---------- */
+function startQuiz(words, repractice){
+  isRepractice = repractice;
+  quizWords = words;
+  matched = new Set(); selL = null; selR = null; lock = false;
+  if (!repractice) wrongFirst = new Set();
+
+  setHeader("শব্দ মিলকরণ", `${toBn(0)}/${toBn(words.length)}`);
+  $("segBar").innerHTML = "";
+
+  const left = shuffle(words);
+  let right = shuffle(words);
+  // ডান পাশের ক্রম বাম পাশের সাথে যেন হুবহু না মেলে (পজিশন দেখে মেলানো ঠেকাতে)
+  if (words.length > 1){
+    for (let t = 0; t < 20 && right.some((w, i) => w.id === left[i].id); t++) right = shuffle(words);
+  }
+
+  screen.innerHTML = `
+    <div class="quiz-wrap">
+      <div class="match-columns">
+        <div class="match-col" id="qLeft"></div>
+        <div class="match-col" id="qRight"></div>
+      </div>
+    </div>
+    <div class="status-box" id="statusBox">বাম পাশ থেকে একটি শব্দ বেছে নাও</div>
+  `;
+  left.forEach(w => $("qLeft").appendChild(makeCard(w, "left")));
+  right.forEach(w => $("qRight").appendChild(makeCard(w, "right")));
+
+  setFooter(`<button class="lbtn" id="nextBtn" disabled>এগিয়ে যাও</button>`);
+  window.scrollTo(0, 0);
+}
+
+function makeCard(w, side){
+  const c = document.createElement("div");
+  c.className = "match-card";
+  c.textContent = side === "left" ? w.word : w.bn;
+  c.dataset.id = w.id;
+  c.dataset.side = side;
+  c.addEventListener("click", () => onCard(side, w, c));
+  return c;
+}
+function setStatus(text, kind){
+  const el = $("statusBox");
+  if (!el) return;
+  el.textContent = text;
+  el.className = "status-box" + (kind ? " " + kind : "");
+}
+
+function onCard(side, w, el){
+  if (lock || matched.has(w.id)) return;
+  const col = side === "left" ? "left" : "right";
+  const cur = side === "left" ? selL : selR;
+  if (cur === w.id){
+    if (side === "left") selL = null; else selR = null;
+    el.classList.remove("selected");
+    return;
+  }
+  document.querySelectorAll(`.match-card[data-side="${col}"]`).forEach(c => c.classList.remove("selected"));
+  if (side === "left"){ selL = w.id; speak(w.word, "en-US"); } else selR = w.id;
+  el.classList.add("selected");
+
+  if (selL !== null && selR !== null) evaluate();
+  else if (selL !== null) setStatus("ডান পাশ থেকে সঠিক অর্থটি বেছে নাও");
+  else setStatus("বাম পাশ থেকে একটি শব্দ বেছে নাও");
+}
+
+function evaluate(){
+  const l = selL, r = selR;
+  const sel = document.querySelectorAll(".match-card.selected");
+  if (l === r){
+    playCorrectSound();
+    matched.add(l);
+    sel.forEach(c => { c.classList.remove("selected"); c.classList.add("correct"); });
+    selL = null; selR = null;
+    $("lessonCounter").textContent = `${toBn(matched.size)}/${toBn(quizWords.length)}`;
+    if (matched.size === quizWords.length) onQuizDone();
+    else setStatus("দারুন! পরেরটা বেছে নাও", "good");
+  } else {
+    playWrongSound();
+    lock = true;
+    wrongFirst.add(l); // যে ইংরেজি শব্দটা মেলাতে গিয়ে ভুল হলো
+    sel.forEach(c => c.classList.add("wrong"));
+    setStatus("মেলেনি, আবার চেষ্টা করো", "bad");
+    setTimeout(() => {
+      document.querySelectorAll(".match-card.wrong").forEach(c => c.classList.remove("wrong", "selected"));
+      selL = null; selR = null; lock = false;
+      setStatus("বাম পাশ থেকে একটি শব্দ বেছে নাও");
+    }, 750);
+  }
+}
+
+async function onQuizDone(){
+  setStatus("সবগুলো মিলিয়ে ফেলেছো! 🎉", "good");
+  const btn = $("nextBtn");
+  btn.disabled = false;
+  if (!isRepractice){
+    btn.onclick = renderResult;
+    await finalizeLesson();
+  } else {
+    btn.onclick = () => { window.location.href = "streak.html?from=lesson"; };
+  }
+}
+
+/* ---------- প্রোগ্রেস সেভ ---------- */
+async function finalizeLesson(){
+  lesson.forEach(w => {
+    const k = String(w.id), cur = progress.strength[k] || 0;
+    progress.strength[k] = wrongFirst.has(w.id) ? Math.max(0, cur - 1) : Math.min(5, cur + 1);
+  });
+
+  // দৈনিক স্ট্রিক
+  const today = new Date().toDateString();
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  if (progress.lastDay !== today){
+    progress.streak = (progress.lastDay === y.toDateString()) ? (progress.streak || 0) + 1 : 1;
+    progress.lastDay = today;
+  }
+  const iso = localIso();
+  if (!progress.practiceDates.includes(iso)) progress.practiceDates.push(iso);
+  progress.practiceDates = progress.practiceDates.slice(-14);
+
+  progress.lessonsCompleted = (progress.lessonsCompleted || 0) + 1;
+
+  try{
+    await setDoc(progressRef(), {
+      strength: progress.strength,
+      streak: progress.streak,
+      lastDay: progress.lastDay,
+      practiceDates: progress.practiceDates,
+      lessonsCompleted: progress.lessonsCompleted
+    }, { merge: true });
+  }catch(e){ console.error("প্রোগ্রেস সেভ করা যায়নি:", e); }
+}
+
+/* ---------- ধাপ ৩: ফলাফল ---------- */
+function renderResult(){
+  const total = lesson.length;
+  const wrong = wrongFirst.size;
+  const right = total - wrong;
+  const starCount = wrong === 0 ? 3 : (wrong <= 2 ? 2 : 1);
+
+  setHeader("", "");
+  $("segBar").innerHTML = "";
+  screen.innerHTML = `
+    <div class="result-wrap">
+      <div class="confetti" id="confetti"></div>
+      <h2>${wrong === 0 ? "অভিনন্দন!" : "ভালোই হচ্ছে!"}</h2>
+      <div class="sub">${wrong === 0 ? "তুমি দারুন পারফর্ম করেছো" : "এভাবেই প্রোগ্রেস এগিয়ে নাও"}</div>
+      <div class="stars">
+        ${[1,2,3].map(n => `<span class="star ${n <= starCount ? "" : "off"}">⭐</span>`).join("")}
+      </div>
+      <div class="tiles">
+        <div class="tile new">নতুন<div class="box">${toBn(total)} টি</div></div>
+        <div class="tile ok">সঠিক<div class="box">${toBn(right)} টি</div></div>
+        <div class="tile bad">ভুল<div class="box">${toBn(wrong)}</div></div>
+      </div>
+    </div>
+  `;
+  burstConfetti();
+  if (wrong === 0) playCorrectSound();
+
+  if (wrong > 0){
+    setFooter(`<button class="lbtn" id="nextBtn">ভুলগুলো রিভিউ করো →</button>`);
+    $("nextBtn").onclick = renderReview;
+  } else {
+    setFooter(`<button class="lbtn" id="nextBtn">এগিয়ে যাও →</button>`);
+    $("nextBtn").onclick = () => { window.location.href = "streak.html?from=lesson"; };
+  }
+  window.scrollTo(0, 0);
+}
+
+function burstConfetti(){
+  const box = $("confetti");
+  if (!box) return;
+  const colors = ["#7B2FF2","#1E9E1E","#F5A623","#FF4D4D","#22B5F5","#FF8A3D"];
+  for (let i = 0; i < 38; i++){
+    const p = document.createElement("i");
+    p.style.left = Math.random() * 100 + "%";
+    p.style.background = colors[i % colors.length];
+    p.style.animationDuration = (2.2 + Math.random() * 2.2) + "s";
+    p.style.animationDelay = (Math.random() * 0.8) + "s";
+    p.style.transform = `rotate(${Math.random() * 180}deg)`;
+    box.appendChild(p);
+  }
+}
+
+/* ---------- ধাপ ৪: ভুলের রিভিউ ---------- */
+function renderReview(){
+  const wrongWords = lesson.filter(w => wrongFirst.has(w.id));
+  setHeader("ভুলগুলো রিভিউ করো", "");
+  $("segBar").innerHTML = "";
+  screen.innerHTML = `
+    <p class="review-intro">এই শব্দগুলোর সঠিক অর্থ দেখে নাও, তারপর আবার অনুশীলন করো।</p>
+    ${wrongWords.map(w => `
+      <div class="review-card">
+        <div>
+          <div class="w">${esc(w.word)}</div>
+          <div class="m">${esc(w.bn)}</div>
+        </div>
+        <button class="play-btn" data-say="${esc(w.word)}" aria-label="উচ্চারণ শোনো">▶</button>
+      </div>`).join("")}
+  `;
+  setFooter(`
+    <button class="lbtn ghost" id="againBtn">আবার অনুশীলন করো</button>
+    <button class="lbtn" id="doneBtn">এগিয়ে যাও →</button>
+  `);
+  $("againBtn").onclick = () => {
+    // ভুল শব্দগুলো নিয়ে আবার মেলানো — অন্তত ৩টা জোড়া রাখার জন্য দরকার হলে অন্য শব্দ যোগ করা হয়
+    let set = [...wrongWords];
+    if (set.length < 3){
+      const extra = shuffle(lesson.filter(w => !wrongFirst.has(w.id))).slice(0, 3 - set.length);
+      set = set.concat(extra);
+    }
+    startQuiz(set, true);
+  };
+  $("doneBtn").onclick = () => { window.location.href = "streak.html?from=lesson"; };
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

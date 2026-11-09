@@ -6,7 +6,12 @@
     "pos": "verb",
     "bn": "বিভ্রান্ত করা",
     "example": "Don't let the instructions confuse you.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "Don't let the instructions confuse you.",
+      "The map can confuse new visitors.",
+      "Please do not confuse me with my brother."
+    ]
   },
   {
     "id": 2,
@@ -15,7 +20,12 @@
     "pos": "noun",
     "bn": "এলাকা",
     "example": "The lion guards its territory fiercely.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The lion guards its territory fiercely.",
+      "This territory belongs to the forest department.",
+      "Each animal protects its own territory."
+    ]
   },
   {
     "id": 3,
@@ -24,7 +34,12 @@
     "pos": "noun",
     "bn": "আগাছা",
     "example": "She pulled the weed out of the garden.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "She pulled the weed out of the garden.",
+      "A weed grew between the stones.",
+      "He removes every weed from the field."
+    ]
   },
   {
     "id": 4,
@@ -33,7 +48,12 @@
     "pos": "noun",
     "bn": "রূপা",
     "example": "The ring was made of pure silver.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The ring was made of pure silver.",
+      "She wore a silver necklace.",
+      "The moon looked silver last night."
+    ]
   },
   {
     "id": 5,
@@ -42,7 +62,12 @@
     "pos": "noun",
     "bn": "প্রভাব",
     "example": "The medicine had an immediate effect.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The medicine had an immediate effect.",
+      "Pollution has a bad effect on health.",
+      "The new rule had no effect."
+    ]
   },
   {
     "id": 6,
@@ -51,7 +76,12 @@
     "pos": "verb",
     "bn": "ফসল তোলা",
     "example": "Farmers harvest rice in autumn.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "Farmers harvest rice in autumn.",
+      "We harvest vegetables from our garden.",
+      "The harvest was very good this year."
+    ]
   },
   {
     "id": 7,
@@ -60,7 +90,12 @@
     "pos": "adjective",
     "bn": "উদার",
     "example": "He is generous with his time.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "He is generous with his time.",
+      "She is a generous teacher.",
+      "A generous man gave food to the poor."
+    ]
   },
   {
     "id": 8,
@@ -69,7 +104,12 @@
     "pos": "adjective",
     "bn": "অগভীর",
     "example": "The pond is shallow near the edge.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "The pond is shallow near the edge.",
+      "Children play in the shallow water.",
+      "The river is shallow in winter."
+    ]
   },
   {
     "id": 9,
@@ -78,7 +118,12 @@
     "pos": "noun",
     "bn": "যাত্রা",
     "example": "Their journey took three long days.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "Their journey took three long days.",
+      "I enjoyed the journey by train.",
+      "Every journey begins with a single step."
+    ]
   },
   {
     "id": 10,
@@ -87,7 +132,12 @@
     "pos": "noun",
     "bn": "সীমান্ত",
     "example": "The river marks the border between the two towns.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "The river marks the border between the two towns.",
+      "They crossed the border at night.",
+      "The border is closed today."
+    ]
   },
   {
     "id": 11,
@@ -96,7 +146,12 @@
     "pos": "verb",
     "bn": "ফিসফিস করা",
     "example": "She began to whisper so no one would hear.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "She began to whisper so no one would hear.",
+      "Please whisper in the library.",
+      "I heard a soft whisper."
+    ]
   },
   {
     "id": 12,
@@ -105,7 +160,12 @@
     "pos": "adjective",
     "bn": "একগুঁয়ে",
     "example": "The stubborn child refused to eat vegetables.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "The stubborn child refused to eat vegetables.",
+      "He is too stubborn to listen.",
+      "A stubborn stain stayed on the shirt."
+    ]
   },
   {
     "id": 13,
@@ -114,7 +174,12 @@
     "pos": "adjective",
     "bn": "প্রাচীন",
     "example": "They found ancient coins near the ruins.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "They found ancient coins near the ruins.",
+      "Egypt has many ancient temples.",
+      "This is an ancient tradition."
+    ]
   },
   {
     "id": 14,
@@ -123,7 +188,12 @@
     "pos": "adjective",
     "bn": "ভঙ্গুর",
     "example": "Handle the glass vase, it's fragile.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "Handle the glass vase, it's fragile.",
+      "The box is full of fragile items.",
+      "Her health is fragile."
+    ]
   },
   {
     "id": 15,
@@ -132,7 +202,12 @@
     "pos": "noun",
     "bn": "শরতের পূর্ণিমা",
     "example": "The harvest moon lit up the whole field.",
-    "level": 3
+    "level": 3,
+    "examples": [
+      "The harvest moon lit up the whole field.",
+      "We watched the harvest moon rise.",
+      "The harvest moon is very bright."
+    ]
   },
   {
     "id": 16,
@@ -141,7 +216,12 @@
     "pos": "adjective",
     "bn": "অনিচ্ছুক",
     "example": "He was reluctant to leave home.",
-    "level": 3
+    "level": 3,
+    "examples": [
+      "He was reluctant to leave home.",
+      "She felt reluctant to speak.",
+      "The reluctant student finally agreed."
+    ]
   },
   {
     "id": 17,
@@ -150,7 +230,12 @@
     "pos": "adjective",
     "bn": "মজবুত",
     "example": "This table is sturdy enough to stand on.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "This table is sturdy enough to stand on.",
+      "He bought a sturdy pair of boots.",
+      "A sturdy fence surrounds the farm."
+    ]
   },
   {
     "id": 18,
@@ -159,7 +244,12 @@
     "pos": "adjective",
     "bn": "সুন্দর ভঙ্গিমায়",
     "example": "The dancer moved in a graceful way.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "The dancer moved in a graceful way.",
+      "The swan looked graceful on the lake.",
+      "She gave a graceful bow."
+    ]
   },
   {
     "id": 19,
@@ -168,7 +258,12 @@
     "pos": "adjective",
     "bn": "আর্দ্র",
     "example": "Dhaka gets very humid in the monsoon.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "Dhaka gets very humid in the monsoon.",
+      "The air feels humid today.",
+      "A humid summer can be tiring."
+    ]
   },
   {
     "id": 20,
@@ -177,7 +272,12 @@
     "pos": "adjective",
     "bn": "কৌতূহলী",
     "example": "The curious cat looked inside the box.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The curious cat looked inside the box.",
+      "Children are naturally curious.",
+      "I am curious about your new job."
+    ]
   },
   {
     "id": 21,
@@ -186,7 +286,12 @@
     "pos": "noun",
     "bn": "আপেল",
     "example": "She ate a red apple.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "She ate a red apple.",
+      "An apple a day is good for health.",
+      "He cut the apple into pieces."
+    ]
   },
   {
     "id": 22,
@@ -195,7 +300,12 @@
     "pos": "noun",
     "bn": "বাড়ি",
     "example": "They live in a small house.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "They live in a small house.",
+      "Our house has a green gate.",
+      "The house was quiet at night."
+    ]
   },
   {
     "id": 23,
@@ -204,7 +314,12 @@
     "pos": "noun",
     "bn": "পানি",
     "example": "Please drink more water.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "Please drink more water.",
+      "The water is very cold.",
+      "We need clean water to live."
+    ]
   },
   {
     "id": 24,
@@ -213,7 +328,12 @@
     "pos": "adjective",
     "bn": "খুশি",
     "example": "He looks very happy today.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "He looks very happy today.",
+      "She was happy to see her friend.",
+      "We are happy with the result."
+    ]
   },
   {
     "id": 25,
@@ -222,7 +342,12 @@
     "pos": "adjective",
     "bn": "সুন্দর",
     "example": "The garden looks beautiful.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The garden looks beautiful.",
+      "She has a beautiful voice.",
+      "What a beautiful morning!"
+    ]
   },
   {
     "id": 26,
@@ -231,7 +356,12 @@
     "pos": "noun",
     "bn": "বন্ধু",
     "example": "She is my best friend.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "She is my best friend.",
+      "A true friend helps you in trouble.",
+      "I met an old friend yesterday."
+    ]
   },
   {
     "id": 27,
@@ -240,7 +370,12 @@
     "pos": "noun",
     "bn": "বিদ্যালয়",
     "example": "The children go to school every day.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The children go to school every day.",
+      "Our school opens at eight.",
+      "He is a teacher at a local school."
+    ]
   },
   {
     "id": 28,
@@ -249,7 +384,12 @@
     "pos": "noun",
     "bn": "টাকা",
     "example": "He saved a lot of money.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "He saved a lot of money.",
+      "Money cannot buy happiness.",
+      "I need some money for the bus."
+    ]
   },
   {
     "id": 29,
@@ -258,7 +398,12 @@
     "pos": "noun",
     "bn": "পরিবার",
     "example": "We had dinner with the family.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "We had dinner with the family.",
+      "My family lives in Dhaka.",
+      "She loves her family very much."
+    ]
   },
   {
     "id": 30,
@@ -267,7 +412,12 @@
     "pos": "verb",
     "bn": "কাজ করা",
     "example": "She works at a hospital.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "She works at a hospital.",
+      "I work from home on Fridays.",
+      "They work hard every day."
+    ]
   },
   {
     "id": 31,
@@ -276,7 +426,12 @@
     "pos": "verb",
     "bn": "ভালোবাসা",
     "example": "They love each other deeply.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "They love each other deeply.",
+      "I love reading story books.",
+      "Children love sweet food."
+    ]
   },
   {
     "id": 32,
@@ -285,7 +440,12 @@
     "pos": "adjective",
     "bn": "শক্তিশালী",
     "example": "He is a strong man.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "He is a strong man.",
+      "The wind was very strong.",
+      "She has a strong voice."
+    ]
   },
   {
     "id": 33,
@@ -294,7 +454,12 @@
     "pos": "adjective",
     "bn": "দুর্বল",
     "example": "The patient felt weak.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The patient felt weak.",
+      "A weak tea is not tasty.",
+      "He is weak in math."
+    ]
   },
   {
     "id": 34,
@@ -303,7 +468,12 @@
     "pos": "adjective",
     "bn": "দ্রুত",
     "example": "She gave a quick reply.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "She gave a quick reply.",
+      "Take a quick look at this.",
+      "He is a quick learner."
+    ]
   },
   {
     "id": 35,
@@ -312,7 +482,12 @@
     "pos": "adjective",
     "bn": "ধীর",
     "example": "The train was very slow.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The train was very slow.",
+      "The traffic was slow this morning.",
+      "A slow walk is good after dinner."
+    ]
   },
   {
     "id": 36,
@@ -321,7 +496,12 @@
     "pos": "adjective",
     "bn": "সৎ",
     "example": "He is an honest person.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "He is an honest person.",
+      "Be honest with your teacher.",
+      "An honest answer is always best."
+    ]
   },
   {
     "id": 37,
@@ -330,7 +510,12 @@
     "pos": "adjective",
     "bn": "অলস",
     "example": "The lazy cat slept all day.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The lazy cat slept all day.",
+      "Don't be lazy, start your work.",
+      "It was a lazy Sunday morning."
+    ]
   },
   {
     "id": 38,
@@ -339,7 +524,12 @@
     "pos": "adjective",
     "bn": "গুরুত্বপূর্ণ",
     "example": "This is an important meeting.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "This is an important meeting.",
+      "Health is more important than money.",
+      "It is important to sleep well."
+    ]
   },
   {
     "id": 39,
@@ -348,7 +538,12 @@
     "pos": "noun",
     "bn": "সিদ্ধান্ত",
     "example": "She made a wise decision.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "She made a wise decision.",
+      "It was a hard decision for him.",
+      "We will take the decision tomorrow."
+    ]
   },
   {
     "id": 40,
@@ -357,7 +552,12 @@
     "pos": "noun",
     "bn": "সাফল্য",
     "example": "Hard work leads to success.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "Hard work leads to success.",
+      "The show was a big success.",
+      "I wish you success."
+    ]
   },
   {
     "id": 41,
@@ -366,7 +566,12 @@
     "pos": "noun",
     "bn": "ব্যর্থতা",
     "example": "Failure teaches valuable lessons.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "Failure teaches valuable lessons.",
+      "He did not fear failure.",
+      "The plan ended in failure."
+    ]
   },
   {
     "id": 42,
@@ -375,7 +580,12 @@
     "pos": "noun",
     "bn": "সুযোগ",
     "example": "This is a great opportunity.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "This is a great opportunity.",
+      "She got an opportunity to study abroad.",
+      "Don't miss this opportunity."
+    ]
   },
   {
     "id": 43,
@@ -384,7 +594,12 @@
     "pos": "noun",
     "bn": "সমস্যা",
     "example": "We need to solve this problem.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "We need to solve this problem.",
+      "I have a problem with my phone.",
+      "That is not a big problem."
+    ]
   },
   {
     "id": 44,
@@ -393,7 +608,12 @@
     "pos": "noun",
     "bn": "সমাধান",
     "example": "They found a good solution.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "They found a good solution.",
+      "Is there a simple solution?",
+      "The solution was easy to understand."
+    ]
   },
   {
     "id": 45,
@@ -402,7 +622,12 @@
     "pos": "adjective",
     "bn": "বিপজ্জনক",
     "example": "That road is very dangerous.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "That road is very dangerous.",
+      "Fire can be dangerous for children.",
+      "It is dangerous to swim here."
+    ]
   },
   {
     "id": 46,
@@ -411,7 +636,12 @@
     "pos": "adjective",
     "bn": "নিরাপদ",
     "example": "Keep your documents safe.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "Keep your documents safe.",
+      "Is this water safe to drink?",
+      "We reached home safe and sound."
+    ]
   },
   {
     "id": 47,
@@ -420,7 +650,12 @@
     "pos": "adjective",
     "bn": "দামি",
     "example": "This phone is very expensive.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "This phone is very expensive.",
+      "The hotel was too expensive for us.",
+      "Fresh fish is expensive these days."
+    ]
   },
   {
     "id": 48,
@@ -429,7 +664,12 @@
     "pos": "adjective",
     "bn": "সস্তা",
     "example": "The market sells cheap vegetables.",
-    "level": 1
+    "level": 1,
+    "examples": [
+      "The market sells cheap vegetables.",
+      "I bought a cheap umbrella.",
+      "That shirt was very cheap."
+    ]
   },
   {
     "id": 49,
@@ -438,7 +678,12 @@
     "pos": "adjective",
     "bn": "ভিড়পূর্ণ",
     "example": "The bus was very crowded.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "The bus was very crowded.",
+      "The market is crowded on Fridays.",
+      "A crowded room felt hot."
+    ]
   },
   {
     "id": 50,
@@ -447,6 +692,11 @@
     "pos": "adjective",
     "bn": "ধৈর্যশীল",
     "example": "A teacher must be patient.",
-    "level": 2
+    "level": 2,
+    "examples": [
+      "A teacher must be patient.",
+      "Please be patient with me.",
+      "The patient nurse helped everyone."
+    ]
   }
 ]

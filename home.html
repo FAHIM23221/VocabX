@@ -44,6 +44,7 @@
         <p>আজকের প্র্যাকটিস শুরু করে ফেলো!</p>
       </div>
       <div class="home-badges">
+        <a href="settings.html" class="level-pill" id="levelPill" style="text-decoration:none;">সব লেভেল</a>
         <a href="streak.html" class="streak-pill" id="streakPill" style="text-decoration:none;">🔥 ০</a>
       </div>
     </div>
@@ -51,7 +52,23 @@
     <div class="home-hero">
       <p class="eyebrow">আজকের প্র্যাকটিস</p>
       <h2>নতুন শব্দ শেখো, পুরনোগুলো ঝালিয়ে নাও</h2>
+      <p class="goal-line" id="goalLine"></p>
       <a href="lesson.html" class="cta-btn">শুরু করো →</a>
+    </div>
+
+    <div class="challenge-card" id="challengeCard">
+      <div class="ch-top">
+        <h3>৬০ দিনের চ্যালেঞ্জ</h3>
+        <span class="ch-pct" id="chPct"></span>
+      </div>
+      <p class="ch-sub" id="chSub">লোড হচ্ছে...</p>
+      <div class="ch-track" id="chTrack" style="display:none;">
+        <div class="ch-fill" id="chFill"></div>
+        <span class="ch-mile" style="left:33.3%"></span>
+        <span class="ch-mile" style="left:66.6%"></span>
+        <span class="ch-mile end"></span>
+      </div>
+      <button class="ch-btn" id="chBtn" style="display:none;"></button>
     </div>
 
     <div class="home-stats">
@@ -60,16 +77,16 @@
         <div class="stat-line" id="wordStatLine">লোড হচ্ছে...</div>
         <div class="home-progress-track"><div class="home-progress-fill" id="wordProgressFill" style="width:0%"></div></div>
       </div>
-      <div class="home-stat-card soon">
+      <a class="home-stat-card" href="sentences.html" style="text-decoration:none; color:inherit; display:block;">
         <h3>বাক্য</h3>
-        <div class="stat-line">শীঘ্রই আসছে</div>
-        <div class="home-progress-track"><div class="home-progress-fill" style="width:0%; background: var(--line);"></div></div>
-      </div>
+        <div class="stat-line" id="sentStatLine">লোড হচ্ছে...</div>
+        <div class="home-progress-track"><div class="home-progress-fill" id="sentProgressFill" style="width:0%"></div></div>
+      </a>
     </div>
 
     <div class="home-premium">
-      <h3>প্রিমিয়াম আনলক করো</h3>
-      <p>সম্পূর্ণ শব্দভাণ্ডার ও ফিচার আনলক করতে যোগাযোগ করো।</p>
+      <h3 id="premiumTitle">প্রিমিয়াম আনলক করো</h3>
+      <p id="premiumText">সম্পূর্ণ শব্দভাণ্ডার ও ফিচার আনলক করতে যোগাযোগ করো।</p>
       <button id="premiumBtn">বিস্তারিত জানো</button>
     </div>
   </div>
@@ -113,9 +130,12 @@
 <script type="module">
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { subscriptionInfo } from "./subscription.js";
+import { challengeInfo, startChallenge, sessionsToday, dailyGoal, allSentences } from "./progress-utils.js";
 
 const MASTERED_AT = 4;
+let currentUid = null;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user){
@@ -125,6 +145,13 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   const data = snap.exists() ? snap.data() : {};
 
+  // প্রিমিয়াম সক্রিয় থাকলে ব্যানারে বাকি মেয়াদ দেখাও
+  const sub = subscriptionInfo(data);
+  if (sub.active){
+    document.getElementById("premiumTitle").textContent = "প্রিমিয়াম সক্রিয় ✓";
+    document.getElementById("premiumText").textContent = toBn(sub.daysLeft) + " দিন বাকি আছে।";
+  }
+
   if (data.banned){
     await signOut(auth);
     alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
@@ -133,6 +160,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   document.getElementById("greetName").textContent = "Hi, " + (data.name || "বন্ধু").split(" ")[0];
+  currentUid = user.uid;
   loadStats(user.uid);
   loadNotice();
   loadPopupNotice();
@@ -213,7 +241,7 @@ document.getElementById("popupNoticeCloseBtn").addEventListener("click", () => {
 });
 
 document.getElementById("premiumBtn").addEventListener("click", () => {
-  alert("প্রিমিয়াম সাবস্ক্রিপশন সিস্টেম শীঘ্রই আসছে।");
+  window.location.href = "subscription.html";
 });
 
 async function loadStats(uid){
@@ -222,6 +250,15 @@ async function loadStats(uid){
 
   document.getElementById("streakPill").textContent = "🔥 " + toBn(prog.streak || 0);
 
+  // লেভেল পিল + আজকের লক্ষ্য
+  document.getElementById("levelPill").textContent = prog.level ? "লেভেল " + toBn(prog.level) : "সব লেভেল";
+  const goal = dailyGoal(prog), done = sessionsToday(prog);
+  document.getElementById("goalLine").textContent = done >= goal
+    ? `আজকের লক্ষ্য পূরণ ✓ (${toBn(done)}/${toBn(goal)} লেসন)`
+    : `আজকের লক্ষ্য: ${toBn(done)}/${toBn(goal)} লেসন`;
+
+  renderChallenge(prog);
+
   try{
     const res = await fetch("words.json");
     const words = await res.json();
@@ -229,8 +266,52 @@ async function loadStats(uid){
     const pct = words.length ? Math.round((mastered / words.length) * 100) : 0;
     document.getElementById("wordStatLine").textContent = `${toBn(mastered)} / ${toBn(words.length)} শেখা হয়েছে`;
     document.getElementById("wordProgressFill").style.width = pct + "%";
+
+    // বাক্যের অগ্রগতি — কতগুলো বাক্য সাজিয়ে "শেখা" হয়েছে
+    const sents = allSentences(words);
+    const keys = new Set(sents.map(s => s.key));
+    const sdone = (Array.isArray(prog.sentenceDone) ? prog.sentenceDone : []).filter(k => keys.has(k)).length;
+    document.getElementById("sentStatLine").textContent = `${toBn(sdone)} / ${toBn(sents.length)} শেখা হয়েছে`;
+    document.getElementById("sentProgressFill").style.width = (sents.length ? Math.round(sdone / sents.length * 100) : 0) + "%";
   }catch(e){
     document.getElementById("wordStatLine").textContent = "—";
+    document.getElementById("sentStatLine").textContent = "—";
+  }
+}
+
+function renderChallenge(prog){
+  const info = challengeInfo(prog);
+  const sub = document.getElementById("chSub"), btn = document.getElementById("chBtn");
+  const track = document.getElementById("chTrack");
+  btn.style.display = "none";
+  const begin = async () => {
+    startChallenge(prog);
+    await setDoc(doc(db, "users", currentUid, "progress", "data"), { challenge: prog.challenge }, { merge: true });
+    renderChallenge(prog);
+  };
+  if (!info.started){
+    track.style.display = "none";
+    document.getElementById("chPct").textContent = "";
+    sub.textContent = "প্রতিদিন একটা লেসন শেষ করে টানা ৬০ দিন শেখার চ্যালেঞ্জ নাও।";
+    btn.textContent = "চ্যালেঞ্জ শুরু করো";
+    btn.style.display = "block";
+    btn.onclick = begin;
+    return;
+  }
+  track.style.display = "block";
+  document.getElementById("chPct").textContent = toBn(info.percent) + "%";
+  document.getElementById("chFill").style.width = Math.max(info.percent, 3) + "%";
+  if (info.finished){
+    sub.textContent = `অভিনন্দন! চ্যালেঞ্জ শেষ — ${toBn(info.doneCount)}/${toBn(info.days)} দিন পূরণ হয়েছে।`;
+    btn.textContent = "নতুন চ্যালেঞ্জ শুরু করো";
+    btn.style.display = "block";
+    btn.onclick = begin;
+  } else {
+    const left = info.days - info.doneCount;
+    sub.innerHTML = "";
+    sub.textContent = info.todayDone
+      ? `আজকের লক্ষ্য পূরণ ✓ — আর ${toBn(left)} দিন বাকি`
+      : `${toBn(info.dayNo)}তম দিনের লক্ষ্য পূরণ করা বাকি — একটা লেসন নাও`;
   }
 }
 

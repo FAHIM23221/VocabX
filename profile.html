@@ -23,8 +23,10 @@
   .avatar{
     width:56px; height:56px; border-radius:50%; background:var(--indigo);
     color:#fff; display:flex; align-items:center; justify-content:center;
-    font-family:'Fraunces',serif; font-size:1.4rem; flex:0 0 auto;
+    font-family:'Fraunces',serif; font-size:1.4rem; flex:0 0 auto; overflow:hidden;
   }
+  .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pstat-sub{ font-size:.72rem; color:var(--ink-soft); margin-top:1px; }
   .id-name{ font-family:'Hind Siliguri',sans-serif; font-weight:700; font-size:1.15rem; }
   .id-email{ color:var(--ink-soft); font-size:0.85rem; }
 
@@ -90,17 +92,43 @@
       </div>
     </div>
 
-    <div class="pstat-card" style="margin-bottom:12px;">
-      <div class="pstat-icon words">🎓</div>
-      <div>
-        <div class="pstat-label">সম্পন্ন লেসন</div>
-        <div class="pstat-value" id="statLessons">০ টি</div>
+    <div class="pstat-grid">
+      <div class="pstat-card">
+        <div class="pstat-icon words">⏱️</div>
+        <div>
+          <div class="pstat-label">শেখার সময়</div>
+          <div class="pstat-value" id="statTime">০ মিনিট</div>
+          <div class="pstat-sub" id="statTimeSub"></div>
+        </div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-icon words">🎓</div>
+        <div>
+          <div class="pstat-label">সম্পন্ন লেসন</div>
+          <div class="pstat-value" id="statLessons">০ টি</div>
+        </div>
       </div>
     </div>
 
     <div class="settings-list">
+      <a class="settings-row" href="edit-profile.html" style="text-decoration:none; color:inherit;">
+        <span>✏️ প্রোফাইল এডিট</span>
+        <span class="arrow">→</span>
+      </a>
+      <a class="settings-row" href="settings.html" style="text-decoration:none; color:inherit;">
+        <span>⚙️ শেখার সেটিংস</span>
+        <span class="arrow">→</span>
+      </a>
+      <a class="settings-row" href="subscription.html" style="text-decoration:none; color:inherit;">
+        <span>💎 সাবস্ক্রিপশন</span>
+        <span class="arrow">→</span>
+      </a>
       <a class="settings-row" href="bookmarks.html" style="text-decoration:none; color:inherit;">
         <span>🔖 বুকমার্ক করা শব্দ</span>
+        <span class="arrow">→</span>
+      </a>
+      <a class="settings-row" href="chat.html" style="text-decoration:none; color:inherit;">
+        <span>💬 সাপোর্ট চ্যাট <span id="chatDot" style="display:none; color:#C23B22;">●</span></span>
         <span class="arrow">→</span>
       </a>
       <button class="settings-row" id="logoutRow">
@@ -141,6 +169,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { formatDuration, localIso } from "./progress-utils.js";
 
 const MASTERED_AT = 4;
 
@@ -166,7 +195,32 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("avatarInitial").textContent = name.trim().charAt(0).toUpperCase();
 
   loadStats(user.uid);
+  loadPhoto(user.uid);
+  checkChatDot(user.uid);
 });
+
+async function loadPhoto(uid){
+  try{
+    const s = await getDoc(doc(db, "users", uid, "profile", "photo"));
+    if (s.exists() && s.data().dataUrl){
+      const av = document.getElementById("avatarInitial");
+      av.textContent = "";
+      const img = document.createElement("img");
+      img.src = s.data().dataUrl; img.alt = "";
+      av.appendChild(img);
+    }
+  }catch(e){ /* ছবি নেই */ }
+}
+async function checkChatDot(uid){
+  try{
+    const c = await getDoc(doc(db, "chats", uid));
+    if (c.exists() && c.data().unreadForUser) document.getElementById("chatDot").style.display = "inline";
+  }catch(e){}
+}
+function fmtTime(sec){
+  const d = formatDuration(sec);
+  return d.h > 0 ? `${toBn(d.h)} ঘণ্টা ${toBn(d.m)} মিনিট` : `${toBn(d.m)} মিনিট`;
+}
 
 document.getElementById("logoutRow").addEventListener("click", async () => {
   await signOut(auth);
@@ -179,6 +233,9 @@ async function loadStats(uid){
 
   document.getElementById("statStreak").textContent = toBn(prog.streak || 0) + " দিন";
   document.getElementById("statLessons").textContent = toBn(prog.lessonsCompleted || 0) + " টি";
+  const todaySec = (prog.learningByDay && prog.learningByDay[localIso()]) || 0;
+  document.getElementById("statTime").textContent = "আজ " + fmtTime(todaySec);
+  document.getElementById("statTimeSub").textContent = "মোট " + fmtTime(prog.learningSeconds || 0);
 
   try{
     const res = await fetch("words.json");

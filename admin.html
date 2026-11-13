@@ -331,6 +331,38 @@
   }
   .notice-tab.is-active{ color: var(--dark-green); font-weight:600; border-bottom-color: var(--primary-green); }
   .notice-tab-panel.is-hidden{ display:none; }
+
+  /* সাবস্ক্রিপশন কোড কার্ড (ভাঁজ করা যায়, যাতে প্যানেলে জায়গা না নেয়) */
+  details.add-admin-card > summary{ cursor:pointer; list-style:none; }
+  details.add-admin-card > summary::-webkit-details-marker{ display:none; }
+  details.add-admin-card > summary h3{ display:inline; margin:0; }
+  details.add-admin-card > summary::after{ content:" ▾"; color: var(--text-muted); }
+  details.add-admin-card[open] > summary::after{ content:" ▴"; }
+  .sub-inner{ margin-top:14px; }
+  .sub-sec-title{ font-size:.85rem; color: var(--text-muted); margin:16px 0 8px; }
+  .chip-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .days-input{
+    width:90px; padding:9px 10px; border-radius:10px; border:1.5px solid var(--border-color);
+    background: var(--bg-color); color: var(--text-main); font-size:.95rem; text-align:center;
+  }
+  .code-result{
+    margin-top:12px; padding:14px; border-radius:12px; background: var(--bg-color);
+    border:1.5px dashed var(--primary-green); text-align:center; display:none;
+  }
+  .code-result .code-text{ font-family:'Courier New', monospace; font-size:1.3rem; font-weight:700; letter-spacing:.08em; color: var(--dark-green); word-break:break-all; }
+  .code-row{
+    display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); font-size:.85rem;
+  }
+  .code-row:last-child{ border-bottom:none; }
+  .code-row .c-main{ flex:1; min-width:0; }
+  .code-row .c-code{ font-family:'Courier New', monospace; font-weight:700; letter-spacing:.04em; word-break:break-all; }
+  .code-row .c-meta{ color: var(--text-muted); font-size:.78rem; margin-top:2px; }
+  .code-row .c-meta.used{ color:#B5502F; }
+  .contact-area{
+    width:100%; min-height:70px; padding:10px 12px; border-radius:10px; resize:vertical;
+    border:1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-main);
+    font-family:'Hind Siliguri', sans-serif; font-size:.92rem;
+  }
   .add-admin-note { font-size: 0.78rem; color: var(--text-muted); margin: 10px 0 0; min-height: 1.2em; }
   
   .empty-note {
@@ -465,6 +497,39 @@
     </div>
   </div>
 
+  <details class="add-admin-card" id="subCard">
+    <summary><h3>সাবস্ক্রিপশন কোড</h3></summary>
+    <div class="sub-inner">
+      <div class="sub-sec-title">নতুন কোড বানাও (প্রতিটা কোড শুধু একবার ব্যবহার করা যাবে)</div>
+      <div class="chip-row">
+        <button class="mini-btn code-chip" data-days="30">৩০ দিন</button>
+        <button class="mini-btn code-chip" data-days="90">৯০ দিন</button>
+        <button class="mini-btn code-chip" data-days="180">১৮০ দিন</button>
+        <button class="mini-btn code-chip" data-days="365">৩৬৫ দিন</button>
+      </div>
+      <div class="add-admin-row" style="align-items:center;">
+        <input type="number" id="codeDays" class="days-input" value="30" min="1" max="3650">
+        <span style="font-size:.88rem; color:var(--text-muted);">দিনের মেয়াদ</span>
+        <button id="genCodeBtn" style="margin-left:auto;">কোড বানাও</button>
+      </div>
+      <div class="code-result" id="codeResult">
+        <div class="code-text" id="newCodeText"></div>
+        <button class="mini-btn promote" id="copyNewCodeBtn" style="margin-top:10px;">কপি করো</button>
+      </div>
+      <p class="add-admin-note" id="codeNote"></p>
+
+      <div class="sub-sec-title">সাম্প্রতিক কোড</div>
+      <div id="codeList"><p class="add-admin-note">খুললে লোড হবে...</p></div>
+
+      <div class="sub-sec-title">ইউজারকে যা দেখানো হবে (পেমেন্ট/যোগাযোগের তথ্য)</div>
+      <textarea class="contact-area" id="contactText" placeholder="যেমন: বিকাশ/নগদ নম্বর, WhatsApp নম্বর, সময়..."></textarea>
+      <div class="add-admin-row" style="margin-top:10px;">
+        <button id="saveContactBtn" style="flex:1;">তথ্য সেভ করো</button>
+      </div>
+      <p class="add-admin-note" id="contactNote"></p>
+    </div>
+  </details>
+
   <div class="user-list-card" id="userListCard">
     <div class="user-list-header">
       <h3>সব ইউজার</h3>
@@ -505,8 +570,9 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where
+  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { subscriptionInfo, generateCode, fmtDateBn } from "./subscription.js";
 
 const MAIN_ADMIN_EMAIL = "fahim360k@gmail.com";
 let currentUserEmail = "";
@@ -545,6 +611,140 @@ onAuthStateChanged(auth, async (user) => {
   loadUsers();
   loadNotice();
   loadPopupNotice();
+});
+
+/* ---- সাবস্ক্রিপশন কোড ---- */
+let codesLoaded = false;
+document.getElementById("subCard").addEventListener("toggle", (e) => {
+  if (e.target.open){
+    loadContactSetting();
+    if (!codesLoaded){ codesLoaded = true; loadCodes(); }
+  }
+});
+document.querySelectorAll(".code-chip").forEach(chip => {
+  chip.addEventListener("click", () => { document.getElementById("codeDays").value = chip.dataset.days; });
+});
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try{ ok = document.execCommand("copy"); }catch(_){}
+    ta.remove();
+    return ok;
+  }
+}
+
+document.getElementById("genCodeBtn").addEventListener("click", async () => {
+  const noteEl = document.getElementById("codeNote");
+  const btn = document.getElementById("genCodeBtn");
+  const days = parseInt(document.getElementById("codeDays").value, 10);
+  if (!Number.isInteger(days) || days < 1 || days > 3650){
+    noteEl.textContent = "মেয়াদ ১ থেকে ৩৬৫০ দিনের মধ্যে লিখো।";
+    noteEl.style.color = "#C0392B";
+    return;
+  }
+  btn.disabled = true;
+  noteEl.textContent = "";
+  let created = null;
+  for (let attempt = 0; attempt < 5 && !created; attempt++){
+    const code = generateCode();
+    try{
+      await setDoc(doc(db, "subscriptionCodes", code), {
+        durationDays: days, used: false, usedBy: null, usedAt: null,
+        createdAt: serverTimestamp(), createdBy: currentUserEmail
+      });
+      created = code;
+    }catch(err){
+      console.error("কোড বানানো যায়নি (চেষ্টা " + (attempt + 1) + "):", err);
+    }
+  }
+  btn.disabled = false;
+  if (!created){
+    noteEl.textContent = "কোড বানানো যায়নি — Firestore rules Publish করা হয়েছে কিনা দেখো।";
+    noteEl.style.color = "#C0392B";
+    return;
+  }
+  document.getElementById("newCodeText").textContent = created;
+  document.getElementById("codeResult").style.display = "block";
+  noteEl.textContent = `${toBn(days)} দিনের কোড তৈরি হয়েছে — কপি করে ইউজারকে দাও।`;
+  noteEl.style.color = "var(--primary-green)";
+  loadCodes();
+});
+
+document.getElementById("copyNewCodeBtn").addEventListener("click", async (e) => {
+  const ok = await copyText(document.getElementById("newCodeText").textContent);
+  e.target.textContent = ok ? "কপি হয়েছে ✓" : "কপি করা যায়নি — হাতে কপি করো";
+  setTimeout(() => { e.target.textContent = "কপি করো"; }, 1800);
+});
+
+async function loadCodes(){
+  const list = document.getElementById("codeList");
+  list.innerHTML = '<p class="add-admin-note">লোড হচ্ছে...</p>';
+  try{
+    const snap = await getDocs(query(collection(db, "subscriptionCodes"), orderBy("createdAt", "desc"), limit(25)));
+    if (snap.empty){
+      list.innerHTML = '<p class="add-admin-note">এখনো কোনো কোড বানানো হয়নি।</p>';
+      return;
+    }
+    list.innerHTML = snap.docs.map(d => {
+      const c = d.data(), code = d.id;
+      let meta, actions = "";
+      if (c.used){
+        const u = allUsers.find(x => x.uid === c.usedBy);
+        const when = c.usedAt && c.usedAt.toDate ? fmtDateBn(c.usedAt.toDate()) : "";
+        meta = `<div class="c-meta used">ব্যবহৃত — ${escapeHtml((u && (u.name || u.email)) || "ইউজার")} ${when ? "· " + when : ""}</div>`;
+      } else {
+        meta = `<div class="c-meta">অব্যবহৃত · ${toBn(c.durationDays)} দিন</div>`;
+        actions = `<button class="mini-btn" data-copy="${escapeHtml(code)}">কপি</button>
+                   <button class="mini-btn danger" data-del="${escapeHtml(code)}">মুছো</button>`;
+      }
+      return `<div class="code-row"><div class="c-main"><div class="c-code">${escapeHtml(code)}</div>${meta}</div>${actions}</div>`;
+    }).join("");
+  }catch(err){
+    console.error(err);
+    list.innerHTML = '<p class="add-admin-note" style="color:#C0392B;">তালিকা আনা যায়নি — rules Publish করা হয়েছে কিনা দেখো।</p>';
+  }
+}
+
+document.getElementById("codeList").addEventListener("click", async (e) => {
+  const cp = e.target.closest("[data-copy]");
+  if (cp){
+    const ok = await copyText(cp.dataset.copy);
+    cp.textContent = ok ? "কপি হয়েছে ✓" : "ব্যর্থ";
+    setTimeout(() => { cp.textContent = "কপি"; }, 1500);
+    return;
+  }
+  const del = e.target.closest("[data-del]");
+  if (del){
+    if (!confirm(del.dataset.del + " কোডটা মুছে ফেলবে? (শুধু অব্যবহৃত কোড মোছা যায়)")) return;
+    try{
+      await deleteDoc(doc(db, "subscriptionCodes", del.dataset.del));
+      loadCodes();
+    }catch(err){ alert("মোছা যায়নি: " + (err.code || err.message)); }
+  }
+});
+
+async function loadContactSetting(){
+  try{
+    const s = await getDoc(doc(db, "settings", "contact"));
+    if (s.exists()) document.getElementById("contactText").value = s.data().text || "";
+  }catch(e){ /* এখনো সেট করা হয়নি */ }
+}
+document.getElementById("saveContactBtn").addEventListener("click", async () => {
+  const noteEl = document.getElementById("contactNote");
+  try{
+    await setDoc(doc(db, "settings", "contact"), { text: document.getElementById("contactText").value.trim() });
+    noteEl.textContent = "সেভ হয়ে গেছে।";
+    noteEl.style.color = "var(--primary-green)";
+  }catch(err){
+    noteEl.textContent = "সমস্যা হয়েছে: " + (err.code || err.message);
+    noteEl.style.color = "#C0392B";
+  }
 });
 
 document.querySelectorAll(".notice-tab").forEach(tab => {
@@ -718,12 +918,15 @@ function openDetails(uid){
   const targetIsMainAdmin = (u.email === MAIN_ADMIN_EMAIL);
   const isAdminRow = u.role === "admin";
   const name = u.name || "নাম নেই";
+  const sub = subscriptionInfo(u);
 
   const fields = [
     ["ইমেইল", escapeHtml(u.email || "—")],
     ["রোল", targetIsMainAdmin ? "👑 মূল অ্যাডমিন" : (isAdminRow ? "অ্যাডমিন" : "ইউজার")],
     ["স্ট্যাটাস", u.banned ? "ব্যানড" : "সক্রিয়"],
-    ["সাবস্ক্রিপশন", u.subscriptionActive ? "সক্রিয়" : "নেই"],
+    ["সাবস্ক্রিপশন", sub.active ? `সক্রিয় · ${toBn(sub.daysLeft)} দিন বাকি` : (u.subscriptionActive ? "মেয়াদ শেষ" : "নেই")],
+    ...(sub.active ? [["মেয়াদ শেষ", fmtDateBn(sub.expiresAt)]] : []),
+    ...(u.phone ? [["মোবাইল", escapeHtml(u.phone)]] : []),
     ["যোগ দিয়েছে", fmtDate(u.createdAt)]
   ];
 
@@ -736,6 +939,10 @@ function openDetails(uid){
         : ``); // প্রমোট শুধু উপরের ইমেইল-ফর্ম দিয়েই হবে, সারি/মোডাল থেকে না
       buttons.push(`<button class="mini-btn danger" data-action="delete" data-uid="${uid}">ইউজার ডিলিট করো</button>`);
     }
+    buttons.push(sub.active
+      ? `<button class="mini-btn danger" data-action="sub-off" data-uid="${uid}">সাবস্ক্রিপশন বন্ধ করো</button>`
+      : "");
+    buttons.push(`<button class="mini-btn promote" data-action="sub-grant" data-uid="${uid}">${sub.active ? "মেয়াদ নতুন করে দাও" : "সাবস্ক্রিপশন দাও"}</button>`);
     if (isMainAdmin || !isAdminRow){
       buttons.push(u.banned
         ? `<button class="mini-btn promote" data-action="unban" data-uid="${uid}">আনব্যান করো</button>`
@@ -786,6 +993,26 @@ document.getElementById("modalSheet").addEventListener("click", async (e) => {
     }
     if (action === "unban"){
       await updateDoc(doc(db, "users", uid), { banned: false });
+      loadUsers(); closeModal();
+    }
+    if (action === "sub-off"){
+      if (!confirm((u.email || "এই ইউজার") + "-এর সাবস্ক্রিপশন এখনই বন্ধ করবে?")){ btn.disabled = false; return; }
+      await updateDoc(doc(db, "users", uid), { subscriptionActive: false });
+      loadUsers(); closeModal();
+    }
+    if (action === "sub-grant"){
+      const v = prompt("কত দিনের সাবস্ক্রিপশন দেবে? (১ থেকে ৩৬৫০)", "30");
+      if (v === null){ btn.disabled = false; return; }
+      const days = parseInt(v, 10);
+      if (!Number.isInteger(days) || days < 1 || days > 3650){
+        noteEl.textContent = "১ থেকে ৩৬৫০ এর মধ্যে একটা সংখ্যা লিখো।";
+        noteEl.style.color = "#C0392B";
+        btn.disabled = false;
+        return;
+      }
+      await updateDoc(doc(db, "users", uid), {
+        subscriptionActive: true, subscriptionStartedAt: serverTimestamp(), subscriptionDays: days
+      });
       loadUsers(); closeModal();
     }
     if (action === "reset"){

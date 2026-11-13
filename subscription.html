@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>সাবস্ক্রিপশন — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  .sub-wrap{ padding: 22px 20px 40px; }
+  .sub-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color: var(--ink-soft); text-decoration:none; font-size:.9rem; }
+  .sub-title{ font-family:'Fraunces', serif; font-size:1.4rem; font-weight:700; margin:0 0 16px; }
+
+  .status-card{
+    border-radius:18px; padding:22px 20px; margin-bottom:16px; color:#fff; text-align:center;
+    background: linear-gradient(135deg, #6d6d6d, #8a8a8a);
+  }
+  .status-card.active{ background: linear-gradient(135deg, #0B3D2E, #1b8a5a); }
+  .status-card .big{ font-size:2.4rem; line-height:1; margin-bottom:8px; }
+  .status-card h2{ margin:0 0 4px; font-size:1.25rem; }
+  .status-card p{ margin:0; opacity:.92; font-size:.92rem; }
+
+  .card{
+    background: var(--surface); border-radius:16px; padding:18px; margin-bottom:16px;
+    box-shadow: 0 2px 8px rgba(20,40,30,.05);
+  }
+  .card h3{ margin:0 0 12px; font-size:1.02rem; }
+  .steps{ margin:0; padding-left:20px; color: var(--ink-soft); font-size:.93rem; line-height:1.9; }
+  .contact-box{
+    margin-top:12px; padding:12px 14px; border-radius:12px; background: var(--paper-deep);
+    font-size:.93rem; white-space:pre-wrap; line-height:1.6;
+  }
+
+  .code-input{
+    width:100%; padding:14px 14px; border-radius:12px; border:1.5px solid var(--line);
+    background: var(--paper); color: var(--ink); font-size:1.1rem; letter-spacing:.08em;
+    font-family:'Fraunces', serif; text-transform:uppercase; text-align:center;
+  }
+  .code-input:disabled{ opacity:.5; }
+  .redeem-btn{
+    width:100%; margin-top:12px; padding:14px 0; border:none; border-radius:999px;
+    background: var(--leaf); color:#fff; font-weight:700; font-size:1rem;
+    font-family:'Hind Siliguri', sans-serif; cursor:pointer; box-shadow: 0 4px 0 rgba(0,0,0,.18);
+  }
+  .redeem-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .msg{ margin-top:12px; font-size:.92rem; text-align:center; min-height:1.3em; }
+  .msg.ok{ color:#177a3c; font-weight:600; }
+  .msg.err{ color:#C0392B; }
+  [data-theme="dark"] .msg.ok{ color:#4fe08a; }
+  [data-theme="dark"] .msg.err{ color:#ff9a7e; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sub-wrap">
+    <div class="sub-head">
+      <a href="profile.html" class="back-link" id="backLink">← ফিরে যাও</a>
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+    </div>
+
+    <h1 class="sub-title">সাবস্ক্রিপশন</h1>
+
+    <div class="status-card" id="statusCard">
+      <div class="big">💎</div>
+      <h2 id="statusTitle">লোড হচ্ছে...</h2>
+      <p id="statusSub"></p>
+    </div>
+
+    <div class="card">
+      <h3>কীভাবে প্রিমিয়াম নেবে?</h3>
+      <ol class="steps">
+        <li>অ্যাডমিনের সাথে যোগাযোগ করে পেমেন্ট করো।</li>
+        <li>অ্যাডমিন তোমাকে একটা কোড দেবে।</li>
+        <li>নিচের ঘরে কোডটা বসিয়ে "কোড বসাও" চাপো।</li>
+      </ol>
+      <div class="contact-box" id="contactBox" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <h3>কোড বসাও</h3>
+      <input class="code-input" id="codeInput" placeholder="VX-XXXXX-XXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <button class="redeem-btn" id="redeemBtn">কোড বসাও</button>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { subscriptionInfo, normalizeCode, fmtDateBn } from "./subscription.js";
+
+let uid = null;
+const $ = (id) => document.getElementById(id);
+
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+function setMsg(text, kind){
+  const m = $("msg");
+  m.textContent = text;
+  m.className = "msg" + (kind ? " " + kind : "");
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const us = await getDoc(doc(db, "users", user.uid));
+  if (us.exists() && us.data().banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+  uid = user.uid;
+  await refresh();
+  loadContact();
+});
+
+async function refresh(){
+  const us = await getDoc(doc(db, "users", uid));
+  const info = subscriptionInfo(us.exists() ? us.data() : null);
+  const card = $("statusCard");
+  card.classList.toggle("active", info.active);
+  if (info.active){
+    $("statusTitle").textContent = "প্রিমিয়াম সক্রিয় ✓";
+    $("statusSub").textContent = `মেয়াদ শেষ: ${fmtDateBn(info.expiresAt)} · ${toBn(info.daysLeft)} দিন বাকি`;
+    $("codeInput").disabled = true;
+    $("redeemBtn").disabled = true;
+    setMsg("তোমার সাবস্ক্রিপশন চলছে — মেয়াদ শেষ হলে নতুন কোড বসাতে পারবে।");
+  } else {
+    $("statusTitle").textContent = "প্রিমিয়াম নেই";
+    $("statusSub").textContent = "কোড বসিয়ে প্রিমিয়াম চালু করো";
+    $("codeInput").disabled = false;
+    $("redeemBtn").disabled = false;
+  }
+}
+
+async function loadContact(){
+  try{
+    const s = await getDoc(doc(db, "settings", "contact"));
+    if (s.exists() && s.data().text){
+      const box = $("contactBox");
+      box.textContent = s.data().text;
+      box.style.display = "block";
+    }
+  }catch(e){ /* যোগাযোগের তথ্য এখনো দেওয়া হয়নি */ }
+}
+
+$("redeemBtn").addEventListener("click", async () => {
+  const code = normalizeCode($("codeInput").value);
+  if (!code){ setMsg("আগে কোডটা লিখো।", "err"); return; }
+  $("redeemBtn").disabled = true;
+  setMsg("যাচাই করা হচ্ছে...");
+  try{
+    const codeRef = doc(db, "subscriptionCodes", code);
+    const snap = await getDoc(codeRef);
+    if (!snap.exists()){ setMsg("কোডটা সঠিক নয় — আবার দেখে লেখো।", "err"); $("redeemBtn").disabled = false; return; }
+    if (snap.data().used){ setMsg("এই কোডটা আগেই ব্যবহার হয়ে গেছে।", "err"); $("redeemBtn").disabled = false; return; }
+
+    // কোড "ব্যবহৃত" চিহ্নিত করা আর সাবস্ক্রিপশন চালু করা — একসাথে, হয় দুটোই হবে নয়তো একটাও না
+    const batch = writeBatch(db);
+    batch.update(codeRef, { used: true, usedBy: uid, usedAt: serverTimestamp() });
+    batch.update(doc(db, "users", uid), {
+      subscriptionActive: true,
+      subscriptionStartedAt: serverTimestamp(),
+      subscriptionDays: Number(snap.data().durationDays),
+      lastRedeemedCode: code
+    });
+    await batch.commit();
+
+    $("codeInput").value = "";
+    await refresh();
+    setMsg("🎉 সাবস্ক্রিপশন চালু হয়ে গেছে!", "ok");
+  }catch(err){
+    console.error(err);
+    if (err && err.code === "permission-denied"){
+      setMsg("কোডটা বসানো যায়নি — এটা হয়তো এইমাত্র ব্যবহার হয়েছে বা অবৈধ।", "err");
+    } else {
+      setMsg("কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করো।", "err");
+    }
+    $("redeemBtn").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

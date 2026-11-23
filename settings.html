@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>শেখার সেটিংস — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  .st-wrap{ padding: 22px 20px 40px; }
+  .st-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color: var(--ink-soft); text-decoration:none; font-size:.9rem; }
+  .st-title{ font-family:'Fraunces', serif; font-size:1.4rem; font-weight:700; margin:0 0 18px; }
+  .st-sec{ font-size:.9rem; color: var(--ink-soft); margin: 22px 0 10px; }
+  .opt{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
+    background: var(--surface); border:2px solid transparent; border-radius:16px; padding:14px 16px; margin-bottom:10px;
+    font-family:'Hind Siliguri', sans-serif; font-size:1rem; color: var(--ink);
+    box-shadow: 0 2px 8px rgba(20,40,30,.05); transition: border-color .15s ease, background .15s ease;
+  }
+  .opt .dot{ width:22px; height:22px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; }
+  .opt.on{ border-color: var(--leaf); }
+  .opt.on .dot{ border-color: var(--leaf); background: radial-gradient(circle, var(--leaf) 45%, transparent 50%); }
+  .opt .t{ font-weight:600; }
+  .opt .d{ color: var(--ink-soft); font-size:.85rem; margin-top:2px; }
+  .seg-row{ display:flex; gap:10px; }
+  .seg-row .opt{ flex:1; justify-content:center; text-align:center; margin-bottom:0; padding:14px 6px; font-weight:600; }
+  .ch-card{ background: var(--surface); border-radius:16px; padding:16px 18px; box-shadow: 0 2px 8px rgba(20,40,30,.05); }
+  .ch-card p{ margin:0 0 12px; color: var(--ink-soft); font-size:.93rem; line-height:1.6; }
+  .ch-btns{ display:flex; gap:10px; }
+  .sbtn{
+    flex:1; padding:13px 0; border:none; border-radius:999px; background: var(--leaf); color:#fff;
+    font-weight:700; font-family:'Hind Siliguri', sans-serif; font-size:.95rem; cursor:pointer;
+  }
+  .sbtn.ghost{ background: var(--paper-deep); color: var(--ink); }
+  .sbtn.danger{ background:#FDE8E3; color:#B5502F; }
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform: translateX(-50%) translateY(20px); opacity:0;
+    background:#177a3c; color:#fff; padding:10px 20px; border-radius:999px; font-size:.9rem; font-weight:600;
+    transition: all .25s ease; pointer-events:none; z-index:50;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+</style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <div class="st-wrap">
+    <div class="st-head">
+      <a href="profile.html" class="back-link">← ফিরে যাও</a>
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+    </div>
+
+    <h1 class="st-title">শেখার সেটিংস</h1>
+
+    <div class="st-sec">শেখার লেভেল</div>
+    <div id="levelOpts">
+      <button class="opt" data-level="1"><span class="dot"></span><span><div class="t">লেভেল ১</div><div class="d">শুধু সহজ শব্দ</div></span></button>
+      <button class="opt" data-level="2"><span class="dot"></span><span><div class="t">লেভেল ২</div><div class="d">সহজ + মাঝারি শব্দ</div></span></button>
+      <button class="opt" data-level="3"><span class="dot"></span><span><div class="t">লেভেল ৩</div><div class="d">সব শব্দ (কঠিনসহ)</div></span></button>
+    </div>
+
+    <div class="st-sec">দৈনিক লক্ষ্য — প্রতিদিন কয়টা লেসন?</div>
+    <div class="seg-row" id="goalOpts">
+      <button class="opt" data-goal="1">১ টি</button>
+      <button class="opt" data-goal="2">২ টি</button>
+      <button class="opt" data-goal="3">৩ টি</button>
+    </div>
+
+    <div class="st-sec">৬০ দিনের চ্যালেঞ্জ</div>
+    <div class="ch-card">
+      <p id="chStatus">লোড হচ্ছে...</p>
+      <div class="ch-btns" id="chBtns"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">সেভ হয়েছে ✓</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { startChallenge, challengeInfo } from "./progress-utils.js";
+
+let uid = null, progress = {};
+const $ = (id) => document.getElementById(id);
+const ref = () => doc(db, "users", uid, "progress", "data");
+
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+function toast(){
+  const t = $("toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1400);
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const us = await getDoc(doc(db, "users", user.uid));
+  if (us.exists() && us.data().banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+  uid = user.uid;
+  const ps = await getDoc(ref());
+  progress = ps.exists() ? ps.data() : {};
+  render();
+});
+
+function render(){
+  const level = Number(progress.level) || 3; // বাছা না থাকলে সব শব্দ = লেভেল ৩
+  document.querySelectorAll("#levelOpts .opt").forEach(o => o.classList.toggle("on", Number(o.dataset.level) === level));
+  const goal = Number(progress.dailyGoal) || 1;
+  document.querySelectorAll("#goalOpts .opt").forEach(o => o.classList.toggle("on", Number(o.dataset.goal) === goal));
+
+  const info = challengeInfo(progress);
+  const btns = $("chBtns");
+  if (!info.started){
+    $("chStatus").textContent = "প্রতিদিন অন্তত একটা লেসন শেষ করে ৬০ দিনে ৬০টা দিন পূরণ করো।";
+    btns.innerHTML = `<button class="sbtn" id="chStart">চ্যালেঞ্জ শুরু করো</button>`;
+  } else if (info.finished){
+    $("chStatus").textContent = `অভিনন্দন! চ্যালেঞ্জ শেষ — ${toBn(info.doneCount)}/${toBn(info.days)} দিন পূরণ হয়েছে।`;
+    btns.innerHTML = `<button class="sbtn" id="chStart">নতুন চ্যালেঞ্জ শুরু করো</button>`;
+  } else {
+    $("chStatus").textContent = `চলছে — দিন ${toBn(info.dayNo)}/${toBn(info.days)}, পূরণ হয়েছে ${toBn(info.doneCount)} দিন (${toBn(info.percent)}%)।`;
+    btns.innerHTML = `<button class="sbtn ghost" id="chStart">নতুন করে শুরু</button><button class="sbtn danger" id="chStop">বন্ধ করো</button>`;
+  }
+  if ($("chStart")) $("chStart").onclick = async () => {
+    if (info.started && !info.finished && !confirm("চলমান চ্যালেঞ্জ মুছে নতুন করে শুরু হবে। ঠিক আছে?")) return;
+    startChallenge(progress);
+    await setDoc(ref(), { challenge: progress.challenge }, { merge: true });
+    toast(); render();
+  };
+  if ($("chStop")) $("chStop").onclick = async () => {
+    if (!confirm("চ্যালেঞ্জটা বন্ধ করে দেবে? এ পর্যন্ত পূরণ করা দিনগুলো মুছে যাবে।")) return;
+    delete progress.challenge;
+    await setDoc(ref(), { challenge: deleteField() }, { merge: true });
+    toast(); render();
+  };
+}
+
+$("levelOpts").addEventListener("click", async (e) => {
+  const o = e.target.closest("[data-level]");
+  if (!o) return;
+  progress.level = Number(o.dataset.level);
+  await setDoc(ref(), { level: progress.level }, { merge: true });
+  toast(); render();
+});
+$("goalOpts").addEventListener("click", async (e) => {
+  const o = e.target.closest("[data-goal]");
+  if (!o) return;
+  progress.dailyGoal = Number(o.dataset.goal);
+  await setDoc(ref(), { dailyGoal: progress.dailyGoal }, { merge: true });
+  toast(); render();
+});
+</script>
+</body>
+</html>

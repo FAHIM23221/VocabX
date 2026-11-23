@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>প্রোফাইল এডিট — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  .ep-wrap{ padding: 22px 20px 40px; }
+  .ep-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color: var(--ink-soft); text-decoration:none; font-size:.9rem; }
+  .ep-title{ font-family:'Fraunces', serif; font-size:1.4rem; font-weight:700; margin:0 0 18px; }
+
+  .photo-box{ display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:24px; }
+  .big-avatar{
+    width:104px; height:104px; border-radius:50%; background: var(--indigo); color:#fff; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; font-family:'Fraunces', serif; font-size:2.6rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  }
+  .big-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-btns{ display:flex; gap:10px; }
+  .pbtn{
+    padding:9px 16px; border-radius:999px; border:1.5px solid var(--line); background: var(--surface);
+    color: var(--ink); font-family:'Hind Siliguri', sans-serif; font-size:.88rem; cursor:pointer;
+  }
+  .pbtn.danger{ color:#B5502F; }
+
+  .card{ background: var(--surface); border-radius:16px; padding:16px 18px; margin-bottom:16px; box-shadow: 0 2px 8px rgba(20,40,30,.05); }
+  .card label{ display:block; font-size:.82rem; color: var(--ink-soft); margin-bottom:6px; }
+  .card input{
+    width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); background: var(--paper);
+    color: var(--ink); font-size:1rem; font-family:'Hind Siliguri', sans-serif;
+  }
+  .card input:disabled{ opacity:.6; }
+  .card .hint{ font-size:.78rem; color: var(--ink-soft); margin-top:6px; }
+  .save-btn{
+    width:100%; padding:14px 0; border:none; border-radius:999px; background: var(--leaf); color:#fff;
+    font-weight:700; font-size:1rem; font-family:'Hind Siliguri', sans-serif; cursor:pointer; box-shadow: 0 4px 0 rgba(0,0,0,.18);
+  }
+  .save-btn:disabled{ opacity:.45; }
+  .msg{ margin-top:12px; text-align:center; font-size:.92rem; min-height:1.3em; }
+  .msg.ok{ color:#177a3c; font-weight:600; } .msg.err{ color:#C0392B; }
+  [data-theme="dark"] .msg.ok{ color:#4fe08a; } [data-theme="dark"] .msg.err{ color:#ff9a7e; }
+</style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <div class="ep-wrap">
+    <div class="ep-head">
+      <a href="profile.html" class="back-link">← ফিরে যাও</a>
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+    </div>
+    <h1 class="ep-title">প্রোফাইল এডিট</h1>
+
+    <div class="photo-box">
+      <div class="big-avatar" id="bigAvatar">?</div>
+      <div class="photo-btns">
+        <button class="pbtn" id="pickPhotoBtn">📷 ছবি বদলাও</button>
+        <button class="pbtn danger" id="removePhotoBtn" style="display:none;">ছবি সরাও</button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none;">
+      <div class="msg" id="photoMsg"></div>
+    </div>
+
+    <div class="card">
+      <label for="nameInput">নাম</label>
+      <input type="text" id="nameInput" maxlength="60" autocomplete="name">
+    </div>
+
+    <div class="card">
+      <label for="phoneInput">মোবাইল নম্বর</label>
+      <input type="tel" id="phoneInput" autocomplete="tel" inputmode="tel">
+      <div class="hint">এই নম্বর দিয়েও লগইন করা যায়, তাই নম্বর বদলালে নতুন নম্বর দিয়েই লগইন করতে হবে।</div>
+    </div>
+
+    <div class="card">
+      <label>ইমেইল</label>
+      <input type="text" id="emailInput" disabled>
+      <div class="hint">ইমেইল বদলানো যায় না।</div>
+    </div>
+
+    <button class="save-btn" id="saveBtn">সেভ করো</button>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc, setDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const $ = (id) => document.getElementById(id);
+let uid = null, userEmail = "", current = { name: "", phone: "" };
+
+function setMsg(id, text, kind){ const m = $(id); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); }
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const us = await getDoc(doc(db, "users", user.uid));
+  const data = us.exists() ? us.data() : {};
+  if (data.banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+  uid = user.uid;
+  userEmail = user.email || data.email || "";
+  current = { name: data.name || "", phone: data.phone || "" };
+  $("nameInput").value = current.name;
+  $("phoneInput").value = current.phone;
+  $("emailInput").value = userEmail;
+  $("bigAvatar").textContent = (current.name || "?").trim().charAt(0).toUpperCase();
+  loadPhoto();
+});
+
+async function loadPhoto(){
+  try{
+    const s = await getDoc(doc(db, "users", uid, "profile", "photo"));
+    if (s.exists() && s.data().dataUrl) showPhoto(s.data().dataUrl); else showPhoto(null);
+  }catch(e){ showPhoto(null); }
+}
+function showPhoto(dataUrl){
+  const av = $("bigAvatar");
+  if (dataUrl){
+    av.textContent = "";
+    const img = document.createElement("img");
+    img.src = dataUrl; img.alt = "";
+    av.appendChild(img);
+    $("removePhotoBtn").style.display = "inline-block";
+  } else {
+    av.textContent = ($("nameInput").value || current.name || "?").trim().charAt(0).toUpperCase();
+    $("removePhotoBtn").style.display = "none";
+  }
+}
+
+/* ---- ছবি: ছোট করে (১৬০×১৬০) Firestore-এ রাখা হয় — আলাদা Storage লাগে না ---- */
+function toAvatarDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const S = 160, c = document.createElement("canvas");
+      c.width = c.height = S;
+      const m = Math.min(img.width, img.height);
+      c.getContext("2d").drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, S, S);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
+    img.src = url;
+  });
+}
+
+$("pickPhotoBtn").onclick = () => $("photoInput").click();
+$("photoInput").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  setMsg("photoMsg", "ছবি তৈরি হচ্ছে...");
+  try{
+    const dataUrl = await toAvatarDataUrl(file);
+    await setDoc(doc(db, "users", uid, "profile", "photo"), { dataUrl, updatedAt: serverTimestamp() });
+    showPhoto(dataUrl);
+    setMsg("photoMsg", "ছবি সেভ হয়েছে ✓", "ok");
+  }catch(err){
+    console.error(err);
+    setMsg("photoMsg", "ছবিটা সেভ করা যায়নি — অন্য একটা ছবি চেষ্টা করো।", "err");
+  }
+  e.target.value = "";
+});
+$("removePhotoBtn").onclick = async () => {
+  try{
+    await deleteDoc(doc(db, "users", uid, "profile", "photo"));
+    showPhoto(null);
+    setMsg("photoMsg", "ছবি সরানো হয়েছে।", "ok");
+  }catch(err){ setMsg("photoMsg", "সরানো যায়নি।", "err"); }
+};
+
+/* ---- নাম ও ফোন নম্বর ---- */
+function normalizePhone(v){ return String(v || "").replace(/[\s\-()]/g, ""); }
+
+$("saveBtn").onclick = async () => {
+  const name = $("nameInput").value.trim();
+  const phone = normalizePhone($("phoneInput").value);
+  if (!name){ setMsg("msg", "নাম খালি রাখা যাবে না।", "err"); return; }
+  if (!/^\+?\d{8,15}$/.test(phone)){ setMsg("msg", "সঠিক মোবাইল নম্বর দাও (শুধু সংখ্যা, ৮–১৫ ডিজিট)।", "err"); return; }
+
+  $("saveBtn").disabled = true;
+  setMsg("msg", "সেভ হচ্ছে...");
+  try{
+    const phoneChanged = phone !== current.phone;
+    if (phoneChanged){
+      const taken = await getDoc(doc(db, "phoneIndex", phone));
+      if (taken.exists() && taken.data().email !== userEmail){
+        setMsg("msg", "এই মোবাইল নম্বর দিয়ে আগে থেকেই একটা অ্যাকাউন্ট আছে।", "err");
+        $("saveBtn").disabled = false;
+        return;
+      }
+    }
+    // নাম + নতুন নম্বর + নম্বরের ইনডেক্স — একসাথে, হয় সব হবে নয়তো কিছুই না
+    const batch = writeBatch(db);
+    batch.update(doc(db, "users", uid), { name, phone });
+    if (phoneChanged){
+      batch.set(doc(db, "phoneIndex", phone), { email: userEmail });
+      if (current.phone) batch.delete(doc(db, "phoneIndex", current.phone));
+    }
+    await batch.commit();
+    current = { name, phone };
+    $("phoneInput").value = phone;
+    setMsg("msg", "সেভ হয়ে গেছে ✓", "ok");
+  }catch(err){
+    console.error(err);
+    setMsg("msg", "সেভ করা যায়নি: " + (err.code || err.message), "err");
+  }
+  $("saveBtn").disabled = false;
+};
+</script>
+</body>
+</html>

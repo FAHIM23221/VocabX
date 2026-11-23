@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>সাপোর্ট চ্যাট — VocabX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  body{ padding-bottom:0; }
+  .chat-app{ height:100vh; height:100dvh; display:flex; flex-direction:column; min-height:0; }
+  .chat-head{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 20px 12px;
+    border-bottom:1px solid var(--line); background: var(--paper); flex:0 0 auto;
+  }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color: var(--ink-soft); text-decoration:none; font-size:.9rem; }
+  .chat-title{ font-weight:700; font-size:1.05rem; }
+  .msgs{ flex:1; overflow-y:auto; padding:16px 16px 8px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .empty{ margin:auto; text-align:center; color: var(--ink-soft); font-size:.92rem; line-height:1.7; padding:0 24px; }
+  .row{ display:flex; }
+  .row.me{ justify-content:flex-end; }
+  .bub{
+    max-width:80%; padding:10px 14px; border-radius:18px; font-size:.97rem; line-height:1.5;
+    white-space:pre-wrap; word-break:break-word;
+  }
+  .me .bub{ background: var(--leaf); color:#fff; border-bottom-right-radius:6px; }
+  .them .bub{ background: var(--surface); color: var(--ink); border-bottom-left-radius:6px; box-shadow:0 1px 4px rgba(20,40,30,.08); }
+  .bub .t{ font-size:.68rem; opacity:.7; margin-top:4px; text-align:right; }
+
+  .req-card, .code-card{ max-width:86%; border-radius:16px; padding:14px 16px; }
+  .req-card{ background:#FFF7E0; border:1px solid #E9C25B; color:#6B4E00; }
+  .req-card .h{ font-weight:700; margin-bottom:4px; }
+  .req-card .body{ font-size:.9rem; white-space:pre-wrap; word-break:break-word; }
+  .badge{ display:inline-block; margin-top:8px; padding:3px 10px; border-radius:99px; font-size:.75rem; font-weight:700; }
+  .badge.pending{ background:#FFE9A8; color:#7a5a00; } .badge.approved{ background:#CFEED8; color:#177a3c; } .badge.rejected{ background:#FBD3CB; color:#B5502F; }
+  .code-card{ background: linear-gradient(135deg, #0B3D2E, #1b8a5a); color:#fff; }
+  .code-card .h{ font-weight:700; margin-bottom:6px; }
+  .code-card .code{ font-family:'Courier New', monospace; font-size:1.25rem; font-weight:700; letter-spacing:.07em; background: rgba(255,255,255,.14); padding:8px 10px; border-radius:10px; text-align:center; word-break:break-all; }
+  .code-card .sub{ font-size:.85rem; opacity:.9; margin:8px 0 10px; }
+  .code-card .btns{ display:flex; gap:8px; }
+  .code-card .btns button, .code-card .btns a{
+    flex:1; text-align:center; text-decoration:none; padding:9px 0; border-radius:99px; border:none; cursor:pointer;
+    background:#fff; color:#0B3D2E; font-weight:700; font-size:.88rem; font-family:'Hind Siliguri', sans-serif;
+  }
+
+  .composer{ flex:0 0 auto; padding:10px 14px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background: var(--paper); }
+  .chips{ display:flex; gap:8px; margin-bottom:8px; }
+  .chip{
+    padding:7px 14px; border-radius:99px; border:1.5px solid var(--line); background: var(--surface);
+    color: var(--ink); font-size:.85rem; font-family:'Hind Siliguri', sans-serif; cursor:pointer;
+  }
+  .chip:disabled{ opacity:.55; cursor:not-allowed; }
+  .req-panel{ display:none; background: var(--surface); border-radius:14px; padding:12px; margin-bottom:10px; }
+  .req-panel.open{ display:block; }
+  .req-panel p{ margin:0 0 8px; font-size:.85rem; color: var(--ink-soft); }
+  .req-panel textarea{
+    width:100%; min-height:64px; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);
+    background: var(--paper); color: var(--ink); font-family:'Hind Siliguri', sans-serif; font-size:.95rem; resize:vertical;
+  }
+  .req-panel .go{
+    width:100%; margin-top:8px; padding:11px 0; border:none; border-radius:99px; background:#C9A227; color:#fff;
+    font-weight:700; font-family:'Hind Siliguri', sans-serif; cursor:pointer;
+  }
+  .send-row{ display:flex; gap:10px; align-items:flex-end; }
+  .send-row textarea{
+    flex:1; max-height:110px; padding:11px 14px; border-radius:20px; border:1.5px solid var(--line);
+    background: var(--surface); color: var(--ink); font-family:'Hind Siliguri', sans-serif; font-size:1rem; resize:none;
+  }
+  .send-btn{
+    width:46px; height:46px; border-radius:50%; border:none; background: var(--leaf); color:#fff; font-size:1.1rem;
+    cursor:pointer; flex:0 0 auto;
+  }
+  .send-btn:disabled{ opacity:.45; }
+</style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
+</head>
+<body>
+
+<div class="app chat-app">
+  <header class="chat-head">
+    <a href="profile.html" class="back-link">← ফিরে যাও</a>
+    <div class="chat-title">💬 সাপোর্ট চ্যাট</div>
+    <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+  </header>
+
+  <div class="msgs" id="msgs"><div class="empty">লোড হচ্ছে...</div></div>
+
+  <div class="composer">
+    <div class="chips">
+      <button class="chip" id="reqToggle">💎 সাবস্ক্রিপশন চাই</button>
+    </div>
+    <div class="req-panel" id="reqPanel">
+      <p>পেমেন্ট করার পর এখান থেকে অ্যাডমিনকে জানাও। পেমেন্টের তথ্য (ট্রানজেকশন আইডি, কত টাকা, কোন নম্বর থেকে) লিখে দিলে যাচাই সহজ হবে।</p>
+      <textarea id="reqNote" maxlength="500" placeholder="যেমন: বিকাশ, TrxID 8N3K..., ৫০০ টাকা, 01XXXXXXXXX থেকে"></textarea>
+      <button class="go" id="reqSend">রিকোয়েস্ট পাঠাও</button>
+    </div>
+    <div class="send-row">
+      <textarea id="input" rows="1" maxlength="1000" placeholder="মেসেজ লেখো..."></textarea>
+      <button class="send-btn" id="sendBtn" aria-label="পাঠাও">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  doc, getDoc, onSnapshot, updateDoc, writeBatch, collection, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const $ = (id) => document.getElementById(id);
+let uid = null, userName = "", userEmail = "";
+let chatExists = false, messages = [], sending = false;
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+function timeOf(m){
+  const t = m.createdAt && (m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt));
+  if (!t || isNaN(t)) return "";
+  return toBn(String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0"));
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const us = await getDoc(doc(db, "users", user.uid));
+  const data = us.exists() ? us.data() : {};
+  if (data.banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+  uid = user.uid;
+  userName = data.name || "ইউজার";
+  userEmail = user.email || data.email || "";
+
+  const chatRef = doc(db, "chats", uid);
+  onSnapshot(chatRef, (snap) => {
+    chatExists = snap.exists();
+    // অ্যাডমিনের নতুন মেসেজ এসে থাকলে "পড়েছি" চিহ্ন দাও
+    if (snap.exists() && snap.data().unreadForUser){
+      updateDoc(chatRef, { unreadForUser: false }).catch(() => {});
+    }
+  });
+  onSnapshot(query(collection(db, "chats", uid, "messages"), orderBy("createdAt", "asc")), (snap) => {
+    messages = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    render();
+  });
+});
+
+function bubble(m){
+  const mine = m.sender === "user";
+  if (m.type === "subscription_request"){
+    const st = m.status || "pending";
+    const label = st === "approved" ? "অ্যাপ্রুভ হয়েছে ✓" : (st === "rejected" ? "বাতিল হয়েছে" : "অপেক্ষমাণ ⏳");
+    return `<div class="row me"><div class="req-card">
+      <div class="h">💎 সাবস্ক্রিপশন রিকোয়েস্ট</div>
+      <div class="body">${esc(m.text)}</div>
+      <span class="badge ${esc(st)}">${label}</span>
+    </div></div>`;
+  }
+  if (m.type === "code"){
+    return `<div class="row them"><div class="code-card">
+      <div class="h">🎉 তোমার সাবস্ক্রিপশন অ্যাপ্রুভ হয়েছে</div>
+      <div class="code">${esc(m.code || "")}</div>
+      <div class="sub">${toBn(m.days || "")} দিনের মেয়াদ — কোডটা বসালেই প্রিমিয়াম চালু হবে (কোডটা শুধু একবারই ব্যবহার করা যায়)।</div>
+      <div class="btns">
+        <button data-copy="${esc(m.code || "")}">কপি</button>
+        <a href="subscription.html?code=${encodeURIComponent(m.code || "")}">কোড বসাও →</a>
+      </div>
+    </div></div>`;
+  }
+  return `<div class="row ${mine ? "me" : "them"}"><div class="bub">${esc(m.text)}<div class="t">${timeOf(m)}</div></div></div>`;
+}
+
+function render(){
+  const box = $("msgs");
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+  if (!messages.length){
+    box.innerHTML = `<div class="empty">এখানে অ্যাডমিনের সাথে সরাসরি কথা বলতে পারবে।<br>কোনো সমস্যা বা প্রশ্ন থাকলে লিখে পাঠাও।</div>`;
+  } else {
+    box.innerHTML = messages.map(bubble).join("");
+    if (nearBottom || messages.length) box.scrollTop = box.scrollHeight;
+  }
+  const pending = messages.some(m => m.type === "subscription_request" && m.status === "pending");
+  $("reqToggle").disabled = pending;
+  $("reqToggle").textContent = pending ? "⏳ রিকোয়েস্ট অপেক্ষমাণ" : "💎 সাবস্ক্রিপশন চাই";
+  if (pending) $("reqPanel").classList.remove("open");
+}
+
+async function send(type, text, extra){
+  if (sending || !uid) return;
+  sending = true;
+  $("sendBtn").disabled = true;
+  try{
+    const chatRef = doc(db, "chats", uid);
+    const msgRef = doc(collection(db, "chats", uid, "messages"));
+    const preview = type === "subscription_request" ? "💎 সাবস্ক্রিপশন রিকোয়েস্ট" : text.slice(0, 80);
+    const batch = writeBatch(db);
+    batch.set(msgRef, Object.assign({ sender: "user", senderUid: uid, type, text, createdAt: serverTimestamp() }, extra || {}));
+    if (chatExists){
+      batch.update(chatRef, { lastMessage: preview, lastMessageAt: serverTimestamp(), lastSender: "user", unreadForAdmin: true, userName, userEmail });
+    } else {
+      batch.set(chatRef, {
+        userId: uid, userName, userEmail, lastMessage: preview, lastMessageAt: serverTimestamp(),
+        lastSender: "user", unreadForAdmin: true, unreadForUser: false, createdAt: serverTimestamp()
+      });
+    }
+    await batch.commit();
+    return true;
+  }catch(err){
+    console.error(err);
+    alert("মেসেজ পাঠানো যায়নি — আবার চেষ্টা করো।");
+    return false;
+  }finally{
+    sending = false;
+    $("sendBtn").disabled = false;
+  }
+}
+
+async function sendText(){
+  const text = $("input").value.trim();
+  if (!text) return;
+  $("input").value = "";
+  const ok = await send("text", text);
+  if (ok === false) $("input").value = text;
+}
+$("sendBtn").onclick = sendText;
+$("input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendText(); }
+});
+
+$("reqToggle").onclick = () => $("reqPanel").classList.toggle("open");
+$("reqSend").onclick = async () => {
+  const note = $("reqNote").value.trim();
+  const text = "আমি পেমেন্ট করেছি, সাবস্ক্রিপশন চাই।" + (note ? "\n" + note : "");
+  $("reqSend").disabled = true;
+  const ok = await send("subscription_request", text, { status: "pending" });
+  $("reqSend").disabled = false;
+  if (ok){ $("reqNote").value = ""; $("reqPanel").classList.remove("open"); }
+};
+
+$("msgs").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-copy]");
+  if (!b) return;
+  try{ await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "কপি হয়েছে ✓"; }
+  catch(_){ b.textContent = "হাতে কপি করো"; }
+  setTimeout(() => { b.textContent = "কপি"; }, 1600);
+});
+</script>
+</body>
+</html>

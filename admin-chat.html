@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>সাপোর্ট ইনবক্স — VocabX অ্যাডমিন</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if ((localStorage.getItem("vocabx_theme") || "light") === "dark"){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+<style>
+  body{ padding-bottom:0; }
+  .ac-app{ height:100vh; height:100dvh; display:flex; flex-direction:column; min-height:0; }
+  .ac-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 20px 12px;
+    border-bottom:1px solid var(--line); background: var(--paper); flex:0 0 auto;
+  }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color: var(--ink-soft); text-decoration:none; font-size:.9rem; cursor:pointer; background:none; border:none; font-family:inherit; }
+  .ac-title{ font-weight:700; font-size:1.02rem; text-align:center; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .list{ flex:1; overflow-y:auto; padding:8px 0; min-height:0; }
+  .conv{
+    display:flex; align-items:center; gap:12px; padding:13px 20px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .conv:active{ background: var(--paper-deep); }
+  .avatar{
+    width:44px; height:44px; border-radius:50%; background:#12A150; color:#fff; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; font-family:'Fraunces', serif; font-size:1.2rem;
+  }
+  .conv .mid{ flex:1; min-width:0; }
+  .conv .nm{ font-weight:600; }
+  .conv .lm{ color: var(--ink-soft); font-size:.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px; }
+  .conv.unread .nm, .conv.unread .lm{ color: var(--ink); font-weight:700; }
+  .conv .right{ text-align:right; flex:0 0 auto; }
+  .conv .tm{ font-size:.72rem; color: var(--ink-soft); }
+  .dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:#C23B22; margin-top:6px; }
+  .empty{ margin:60px 24px; text-align:center; color: var(--ink-soft); line-height:1.7; }
+
+  .msgs{ flex:1; overflow-y:auto; padding:16px 16px 8px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .row{ display:flex; } .row.me{ justify-content:flex-end; }
+  .bub{ max-width:80%; padding:10px 14px; border-radius:18px; font-size:.97rem; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
+  .me .bub{ background:#12A150; color:#fff; border-bottom-right-radius:6px; }
+  .them .bub{ background: var(--surface); color: var(--ink); border-bottom-left-radius:6px; box-shadow:0 1px 4px rgba(20,40,30,.08); }
+  .bub .t{ font-size:.68rem; opacity:.7; margin-top:4px; text-align:right; }
+
+  .req-card{ max-width:90%; border-radius:16px; padding:14px 16px; background:#FFF7E0; border:1px solid #E9C25B; color:#6B4E00; }
+  .req-card .h{ font-weight:700; margin-bottom:4px; }
+  .req-card .body{ font-size:.9rem; white-space:pre-wrap; word-break:break-word; }
+  .badge{ display:inline-block; margin-top:8px; padding:3px 10px; border-radius:99px; font-size:.75rem; font-weight:700; }
+  .badge.approved{ background:#CFEED8; color:#177a3c; } .badge.rejected{ background:#FBD3CB; color:#B5502F; }
+  .approve-row{ display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  .approve-row select{
+    padding:8px 10px; border-radius:10px; border:1.5px solid #E9C25B; background:#fff; color:#3b2e00;
+    font-family:'Hind Siliguri', sans-serif; font-size:.9rem;
+  }
+  .abtn{ padding:9px 14px; border:none; border-radius:99px; cursor:pointer; font-weight:700; font-size:.88rem; font-family:'Hind Siliguri', sans-serif; }
+  .abtn.ok{ background:#12A150; color:#fff; } .abtn.no{ background:#FBD3CB; color:#B5502F; }
+  .abtn:disabled{ opacity:.5; }
+  .code-note{ max-width:86%; border-radius:16px; padding:12px 14px; background: linear-gradient(135deg, #0B3D2E, #1b8a5a); color:#fff; font-size:.9rem; }
+  .code-note .code{ font-family:'Courier New', monospace; font-weight:700; letter-spacing:.06em; font-size:1.1rem; margin-top:4px; }
+
+  .composer{ flex:0 0 auto; padding:10px 14px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background: var(--paper); }
+  .send-row{ display:flex; gap:10px; align-items:flex-end; }
+  .send-row textarea{
+    flex:1; max-height:110px; padding:11px 14px; border-radius:20px; border:1.5px solid var(--line);
+    background: var(--surface); color: var(--ink); font-family:'Hind Siliguri', sans-serif; font-size:1rem; resize:none;
+  }
+  .send-btn{ width:46px; height:46px; border-radius:50%; border:none; background:#12A150; color:#fff; font-size:1.1rem; cursor:pointer; flex:0 0 auto; }
+  .send-btn:disabled{ opacity:.45; }
+  .hidden{ display:none !important; }
+</style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
+</head>
+<body>
+
+<div class="app ac-app">
+  <header class="ac-head">
+    <a href="admin.html" class="back-link" id="backLink">← অ্যাডমিন প্যানেল</a>
+    <div class="ac-title" id="title">সাপোর্ট ইনবক্স</div>
+    <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+  </header>
+
+  <!-- তালিকা -->
+  <div class="list" id="listView"><div class="empty">লোড হচ্ছে...</div></div>
+
+  <!-- কথোপকথন -->
+  <div class="msgs hidden" id="threadView"></div>
+  <div class="composer hidden" id="composer">
+    <div class="send-row">
+      <textarea id="input" rows="1" maxlength="1000" placeholder="উত্তর লেখো..."></textarea>
+      <button class="send-btn" id="sendBtn" aria-label="পাঠাও">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("vocabx_theme") || "light";
+    const btn = document.getElementById("themeToggleBtn");
+    btn.textContent = saved === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("vocabx_theme", "light");
+        btn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("vocabx_theme", "dark");
+        btn.textContent = "☀️";
+      }
+    });
+  });
+</script>
+
+<script type="module">
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  doc, getDoc, onSnapshot, updateDoc, writeBatch, collection, query, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { generateCode } from "./subscription.js";
+
+const MAIN_ADMIN_EMAIL = "fahim360k@gmail.com";
+const $ = (id) => document.getElementById(id);
+let adminEmail = "", chats = [], openUid = null, openChat = null, messages = [], unsubThread = null, sending = false;
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+function toDate(x){ return x && (x.toDate ? x.toDate() : new Date(x)); }
+function timeShort(x){
+  const t = toDate(x);
+  if (!t || isNaN(t)) return "";
+  const now = new Date();
+  if (t.toDateString() === now.toDateString()) return toBn(String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0"));
+  return toBn(t.getDate() + "/" + (t.getMonth() + 1));
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const us = await getDoc(doc(db, "users", user.uid));
+  const data = us.exists() ? us.data() : {};
+  if (data.banned){
+    await signOut(auth);
+    window.location.href = "login.html";
+    return;
+  }
+  const isAdmin = user.email === MAIN_ADMIN_EMAIL || data.role === "admin";
+  if (!isAdmin){ window.location.href = "home.html"; return; }
+  adminEmail = user.email;
+
+  onSnapshot(query(collection(db, "chats"), orderBy("lastMessageAt", "desc"), limit(50)), (snap) => {
+    chats = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    renderList();
+  });
+
+  const u = new URLSearchParams(location.search).get("u");
+  if (u) openThread(u);
+});
+
+/* ---------- তালিকা ---------- */
+function renderList(){
+  const box = $("listView");
+  if (!chats.length){
+    box.innerHTML = `<div class="empty">এখনো কোনো মেসেজ আসেনি।</div>`;
+    return;
+  }
+  box.innerHTML = chats.map(c => `
+    <div class="conv ${c.unreadForAdmin ? "unread" : ""}" data-uid="${esc(c.id)}">
+      <div class="avatar">${esc((c.userName || "?").trim().charAt(0).toUpperCase())}</div>
+      <div class="mid">
+        <div class="nm">${esc(c.userName || "ইউজার")}</div>
+        <div class="lm">${c.lastSender === "admin" ? "আপনি: " : ""}${esc(c.lastMessage || "")}</div>
+      </div>
+      <div class="right"><div class="tm">${timeShort(c.lastMessageAt)}</div>${c.unreadForAdmin ? '<span class="dot"></span>' : ""}</div>
+    </div>`).join("");
+  if (openUid){ openChat = chats.find(c => c.id === openUid) || openChat; }
+}
+$("listView").addEventListener("click", (e) => {
+  const c = e.target.closest(".conv");
+  if (c) openThread(c.dataset.uid);
+});
+
+/* ---------- কথোপকথন ---------- */
+function openThread(uid){
+  openUid = uid;
+  openChat = chats.find(c => c.id === uid) || { id: uid };
+  $("listView").classList.add("hidden");
+  $("threadView").classList.remove("hidden");
+  $("composer").classList.remove("hidden");
+  $("title").textContent = (openChat.userName || "ইউজার") + (openChat.userEmail ? " · " + openChat.userEmail : "");
+  $("backLink").textContent = "← ইনবক্স";
+  $("backLink").removeAttribute("href");
+  $("backLink").onclick = closeThread;
+  if (unsubThread) unsubThread();
+  unsubThread = onSnapshot(query(collection(db, "chats", uid, "messages"), orderBy("createdAt", "asc")), (snap) => {
+    messages = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    renderThread();
+  });
+  // পড়া হয়েছে চিহ্ন
+  updateDoc(doc(db, "chats", uid), { unreadForAdmin: false }).catch(() => {});
+}
+function closeThread(){
+  if (unsubThread){ unsubThread(); unsubThread = null; }
+  openUid = null;
+  $("threadView").classList.add("hidden");
+  $("composer").classList.add("hidden");
+  $("listView").classList.remove("hidden");
+  $("title").textContent = "সাপোর্ট ইনবক্স";
+  $("backLink").textContent = "← অ্যাডমিন প্যানেল";
+  $("backLink").setAttribute("href", "admin.html");
+  $("backLink").onclick = null;
+}
+
+function renderThread(){
+  const box = $("threadView");
+  box.innerHTML = messages.map(m => {
+    const mine = m.sender === "admin";
+    if (m.type === "subscription_request"){
+      const st = m.status || "pending";
+      let tail;
+      if (st === "pending"){
+        tail = `<div class="approve-row">
+          <select id="days-${esc(m.id)}">
+            <option value="30">৩০ দিন</option><option value="90">৯০ দিন</option>
+            <option value="180">১৮০ দিন</option><option value="365">৩৬৫ দিন</option>
+          </select>
+          <button class="abtn ok" data-approve="${esc(m.id)}">✅ অ্যাপ্রুভ</button>
+          <button class="abtn no" data-reject="${esc(m.id)}">বাতিল</button>
+        </div>`;
+      } else if (st === "approved"){
+        tail = `<span class="badge approved">অ্যাপ্রুভ হয়েছে ✓ ${m.approvedDays ? "· " + toBn(m.approvedDays) + " দিন" : ""}</span>`;
+      } else {
+        tail = `<span class="badge rejected">বাতিল করা হয়েছে</span>`;
+      }
+      return `<div class="row them"><div class="req-card"><div class="h">💎 সাবস্ক্রিপশন রিকোয়েস্ট</div><div class="body">${esc(m.text)}</div>${tail}</div></div>`;
+    }
+    if (m.type === "code"){
+      return `<div class="row me"><div class="code-note">কোড পাঠানো হয়েছে (${toBn(m.days || "")} দিন)<div class="code">${esc(m.code || "")}</div></div></div>`;
+    }
+    return `<div class="row ${mine ? "me" : "them"}"><div class="bub">${esc(m.text)}</div></div>`;
+  }).join("") || `<div class="empty">কোনো মেসেজ নেই।</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ---------- উত্তর পাঠানো ---------- */
+function addAdminMessage(batch, fields, preview){
+  const msgRef = doc(collection(db, "chats", openUid, "messages"));
+  batch.set(msgRef, Object.assign({ sender: "admin", senderUid: auth.currentUser ? auth.currentUser.uid : "admin", createdAt: serverTimestamp() }, fields));
+  batch.update(doc(db, "chats", openUid), {
+    lastMessage: preview, lastMessageAt: serverTimestamp(), lastSender: "admin", unreadForUser: true, unreadForAdmin: false
+  });
+}
+
+async function sendReply(){
+  const text = $("input").value.trim();
+  if (!text || sending || !openUid) return;
+  sending = true; $("sendBtn").disabled = true;
+  try{
+    const batch = writeBatch(db);
+    addAdminMessage(batch, { type: "text", text }, text.slice(0, 80));
+    await batch.commit();
+    $("input").value = "";
+  }catch(err){
+    console.error(err);
+    alert("পাঠানো যায়নি: " + (err.code || err.message));
+  }
+  sending = false; $("sendBtn").disabled = false;
+}
+$("sendBtn").onclick = sendReply;
+$("input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendReply(); }
+});
+
+/* ---------- অ্যাপ্রুভ / বাতিল ---------- */
+$("threadView").addEventListener("click", async (e) => {
+  const ap = e.target.closest("[data-approve]");
+  const rj = e.target.closest("[data-reject]");
+  if (!ap && !rj) return;
+  const reqId = (ap || rj).dataset.approve || (ap || rj).dataset.reject;
+  const btns = (ap || rj).closest(".approve-row").querySelectorAll("button");
+  btns.forEach(b => b.disabled = true);
+
+  try{
+    const reqRef = doc(db, "chats", openUid, "messages", reqId);
+    if (ap){
+      const days = parseInt($("days-" + reqId).value, 10);
+      // নতুন কোড বানানো + ইউজারকে পাঠানো + রিকোয়েস্ট "অ্যাপ্রুভ" চিহ্নিত — একসাথে (দুর্লভ সংঘর্ষে নতুন কোড দিয়ে আবার চেষ্টা)
+      let done = false, lastErr = null;
+      for (let attempt = 0; attempt < 5 && !done; attempt++){
+        const code = generateCode();
+        try{
+          const batch = writeBatch(db);
+          batch.set(doc(db, "subscriptionCodes", code), {
+            durationDays: days, used: false, usedBy: null, usedAt: null,
+            createdAt: serverTimestamp(), createdBy: adminEmail
+          });
+          addAdminMessage(batch, {
+            type: "code", code, days,
+            text: `তোমার সাবস্ক্রিপশন অ্যাপ্রুভ হয়েছে। কোড: ${code} (${days} দিন)`
+          }, "🎉 সাবস্ক্রিপশন কোড পাঠানো হয়েছে");
+          batch.update(reqRef, { status: "approved", approvedCode: code, approvedDays: days, approvedBy: adminEmail });
+          await batch.commit();
+          done = true;
+        }catch(err){ lastErr = err; console.error("চেষ্টা " + (attempt + 1), err); }
+      }
+      if (!done) throw lastErr;
+    } else {
+      const reason = prompt("বাতিলের কারণ লিখতে চাইলে লেখো (ঐচ্ছিক):", "") ;
+      if (reason === null){ btns.forEach(b => b.disabled = false); return; }
+      const batch = writeBatch(db);
+      batch.update(reqRef, { status: "rejected", rejectedBy: adminEmail });
+      const msg = "তোমার সাবস্ক্রিপশন রিকোয়েস্ট বাতিল করা হয়েছে।" + (reason.trim() ? "\nকারণ: " + reason.trim() : "");
+      addAdminMessage(batch, { type: "text", text: msg }, "রিকোয়েস্ট বাতিল করা হয়েছে");
+      await batch.commit();
+    }
+  }catch(err){
+    console.error(err);
+    alert("কাজটা হয়নি: " + (err.code || err.message) + "\n(Firestore rules Publish করা হয়েছে কিনা দেখো)");
+    btns.forEach(b => b.disabled = false);
+  }
+});
+</script>
+</body>
+</html>

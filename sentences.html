@@ -14,10 +14,78 @@
     document.documentElement.setAttribute("data-theme", "dark");
   }
 </script>
+<style>
+  body{ padding-bottom: 0; }
+  .sb-app{ padding-bottom: 170px; }
+  .sb-wrap{ padding: 6px 20px 0; }
+  .seg-bar{ display:flex; gap:8px; padding:6px 0 16px; }
+  .seg{ flex:1; height:7px; border-radius:99px; background: var(--paper-deep); transition: background .3s ease; }
+  .seg.on{ background: var(--leaf); }
+
+  .sb-title{ font-weight:700; font-size:1.1rem; margin: 4px 0 4px; }
+  .sb-hint{
+    background: var(--surface); border-radius:14px; padding:12px 14px; margin:10px 0 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.95rem; color: var(--ink-soft);
+  }
+  .sb-hint b{ color: var(--ink); font-family:'Fraunces', serif; }
+  .play-btn{
+    width:40px; height:40px; border-radius:50%; border:none; background: var(--leaf); color:#fff;
+    font-size:.95rem; cursor:pointer; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  }
+  .answer-area{
+    min-height: 124px; border-radius:16px; background: var(--surface); padding:12px;
+    display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start;
+    box-shadow: 0 2px 8px rgba(20,40,30,.05);
+    transition: box-shadow .2s ease;
+  }
+  .answer-area.ok{ box-shadow: 0 0 0 2px var(--leaf); }
+  .answer-area.bad{ box-shadow: 0 0 0 2px #C23B22; animation: sb-shake .4s ease; }
+  @keyframes sb-shake{ 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-5px);} 75%{ transform:translateX(5px);} }
+  .bank{ display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; justify-content:center; min-height:56px; }
+  .tok{
+    border:1.5px solid var(--ink); background: var(--surface); color: var(--ink); border-radius:12px;
+    padding:9px 14px; font-size:1.02rem; cursor:pointer; font-family:'Hind Siliguri', sans-serif;
+    box-shadow: 2px 2px 0 var(--line); transition: transform .12s ease;
+  }
+  .tok:active{ transform: scale(.94); }
+  .tok.in-answer{ border-color: var(--leaf); }
+  .tok:disabled{ cursor:default; opacity:.7; }
+
+  .sb-feedback{ margin: 16px 0 0; padding:14px; border-radius:14px; text-align:center; font-size:.95rem; display:none; }
+  .sb-feedback.ok{ display:block; background:#E3F4E8; color:#177a3c; }
+  .sb-feedback.bad{ display:block; background:#FDE8E3; color:#B5502F; }
+  [data-theme="dark"] .sb-feedback.ok{ background: rgba(27,184,101,.15); color:#4fe08a; }
+  [data-theme="dark"] .sb-feedback.bad{ background: rgba(217,105,74,.15); color:#ff9a7e; }
+  .sb-feedback .correct-text{ display:block; margin-top:6px; font-weight:700; font-family:'Fraunces', serif; font-size:1.05rem; }
+
+  .sb-footer{
+    position:fixed; left:0; right:0; bottom:66px; max-width:480px; margin:0 auto; z-index:30;
+    padding:12px 20px; background: var(--paper); display:flex; gap:10px; border-top:1px solid var(--line);
+  }
+  .lbtn{
+    flex:1; padding:15px 0; border:none; border-radius:999px; background: var(--leaf); color:#fff;
+    font-weight:700; font-size:1rem; font-family:'Hind Siliguri', sans-serif; cursor:pointer;
+    box-shadow: 0 4px 0 rgba(0,0,0,.18);
+  }
+  .lbtn:disabled{ opacity:.4; cursor:not-allowed; background:#6f6f6f; }
+  .lbtn.ghost{ background: var(--surface); color: var(--ink); border:1.5px solid var(--line); box-shadow:none; }
+
+  .res{ text-align:center; padding: 30px 20px 0; }
+  .res h2{ font-family:'Fraunces', serif; font-size:1.9rem; margin:0 0 6px; }
+  .res .sub{ color: var(--ink-soft); }
+  .res .stars{ display:flex; justify-content:center; gap:10px; margin:26px 0 30px; font-size:3.6rem; }
+  .res .star.off{ filter: grayscale(1) opacity(.3); }
+  .res .tiles{ display:flex; gap:10px; }
+  .res .tile{ flex:1; border-radius:18px; padding:9px 8px 10px; color:#fff; font-weight:700; }
+  .res .tile .box{ background: var(--surface); color: var(--ink); border-radius:12px; padding:13px 6px; margin-top:8px; font-size:1.25rem; }
+  .res .tile.ok{ background:#1E9E1E; } .res .tile.bad{ background:#C23B22; } .res .tile.all{ background:#7B2FF2; }
+</style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 </head>
 <body>
 
-<div class="app">
+<div class="app sb-app">
   <header class="topbar">
     <div class="brand-lockup">Vocab<img src="logo-mark.png" alt="X"></div>
     <div class="stats">
@@ -25,11 +93,12 @@
     </div>
   </header>
 
-  <div class="soon-wrap">
-    <div class="icon">✏️</div>
-    <h2>বাক্য গঠন শীঘ্রই আসছে</h2>
-    <p>এই ফিচারটা এখনো তৈরি হচ্ছে — শব্দ শিখতে শিখতে বাক্য বানানো শেখাবে।</p>
+  <div class="sb-wrap">
+    <div class="seg-bar" id="segBar"></div>
+    <div id="screen"></div>
   </div>
+
+  <div class="sb-footer" id="footer"></div>
 
   <nav class="bottom-nav">
     <a href="home.html" class="nav-item"><span class="nav-icon-wrap"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span>হোম</a>
@@ -58,12 +127,219 @@
     });
   });
 </script>
+
 <script type="module">
-import { auth } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-onAuthStateChanged(auth, (user) => {
-  if (!user) window.location.href = "login.html";
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { speak, playCorrectSound, playWrongSound } from "./sounds.js";
+import { allSentences, poolForLevel, markPracticeToday, bumpSessionsToday } from "./progress-utils.js";
+import { startTimeTracking } from "./timetrack.js";
+
+const ROUND = 5;
+const $ = (id) => document.getElementById(id);
+
+let uid = null, progress = {};
+let items = [];
+let idx = 0;
+let bank = [], answer = [];
+let attempts = 0, firstTryOk = new Set(), solved = new Set(), wrongSeen = new Set();
+let locked = false;
+
+function toBn(n){
+  const digits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).split("").map(c => /[0-9]/.test(c) ? digits[c] : c).join("");
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function shuffle(a){
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  return arr;
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ window.location.href = "login.html"; return; }
+  const us = await getDoc(doc(db, "users", user.uid));
+  if (us.exists() && us.data().banned){
+    await signOut(auth);
+    alert("তোমার অ্যাকাউন্ট নিষিদ্ধ (ব্যান) করা হয়েছে।");
+    window.location.href = "login.html";
+    return;
+  }
+  uid = user.uid;
+  startTimeTracking(db, uid);
+  const ps = await getDoc(doc(db, "users", uid, "progress", "data"));
+  progress = ps.exists() ? ps.data() : {};
+  const words = await (await fetch("words.json")).json();
+  window.__words = words;
+  startRound(words);
 });
+
+function startRound(words){
+  const pool = allSentences(poolForLevel(words, progress));
+  const done = new Set(Array.isArray(progress.sentenceDone) ? progress.sentenceDone : []);
+  // না-করা বাক্য আগে, তারপর বাকিগুলো; একই শব্দের বাক্য একসাথে না আনার চেষ্টা
+  const fresh = shuffle(pool.filter(s => !done.has(s.key)));
+  const old = shuffle(pool.filter(s => done.has(s.key)));
+  const ordered = fresh.concat(old);
+  const picked = [], usedWords = new Set();
+  for (const s of ordered){
+    if (picked.length >= ROUND) break;
+    if (!usedWords.has(s.wordId)){ picked.push(s); usedWords.add(s.wordId); }
+  }
+  for (const s of ordered){ if (picked.length >= ROUND) break; if (!picked.includes(s)) picked.push(s); }
+  items = picked;
+  idx = 0; firstTryOk = new Set(); solved = new Set(); wrongSeen = new Set();
+  renderItem();
+}
+
+function renderSegs(){
+  $("segBar").innerHTML = items.map((_, i) => `<div class="seg ${i <= idx ? "on" : ""}"></div>`).join("");
+}
+
+function newBank(s){
+  const tokens = s.text.split(/\s+/).map((t, i) => ({ id: i, text: t }));
+  let b = shuffle(tokens);
+  if (tokens.length > 1){
+    for (let t = 0; t < 20 && b.every((x, i) => x.id === i); t++) b = shuffle(tokens);
+  }
+  return b;
+}
+
+function renderItem(){
+  const s = items[idx];
+  attempts = 0; locked = false;
+  bank = newBank(s);
+  answer = [];
+  renderSegs();
+  $("screen").innerHTML = `
+    <div class="sb-title">বাক্যটি সাজাও</div>
+    <div class="sb-hint">
+      <span>ইঙ্গিত: <b>${esc(s.word)}</b> = <span class="bn-text">${esc(s.bn)}</span></span>
+      <button class="play-btn" id="hearBtn" aria-label="বাক্যটি শোনো">▶</button>
+    </div>
+    <div class="answer-area" id="answerArea"></div>
+    <div class="bank" id="bank"></div>
+    <div class="sb-feedback" id="fb"></div>
+  `;
+  $("hearBtn").onclick = () => speak(s.text, "en-US");
+  setFooter("check");
+  drawTokens();
+  window.scrollTo(0, 0);
+}
+
+function drawTokens(){
+  const a = $("answerArea"), b = $("bank");
+  a.innerHTML = answer.map(t => `<button class="tok in-answer" data-id="${t.id}" data-from="answer" ${locked ? "disabled" : ""}>${esc(t.text)}</button>`).join("");
+  b.innerHTML = bank.map(t => `<button class="tok" data-id="${t.id}" data-from="bank" ${locked ? "disabled" : ""}>${esc(t.text)}</button>`).join("");
+  const chk = $("checkBtn");
+  if (chk) chk.disabled = bank.length > 0 || locked;
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest(".tok");
+  if (!t || locked) return;
+  const id = Number(t.dataset.id);
+  if (t.dataset.from === "bank"){
+    const i = bank.findIndex(x => x.id === id);
+    if (i > -1) answer.push(bank.splice(i, 1)[0]);
+  } else {
+    const i = answer.findIndex(x => x.id === id);
+    if (i > -1) bank.push(answer.splice(i, 1)[0]);
+  }
+  drawTokens();
+});
+
+function setFooter(mode){
+  const f = $("footer");
+  const nextLabel = idx === items.length - 1 ? "ফলাফল দেখো →" : "পরের বাক্য →";
+  if (mode === "check"){
+    f.innerHTML = `<button class="lbtn" id="checkBtn" disabled>চেক করো</button>`;
+    $("checkBtn").onclick = check;
+  } else if (mode === "next-ok"){
+    f.innerHTML = `<button class="lbtn" id="nextBtn">${nextLabel}</button>`;
+    $("nextBtn").onclick = next;
+  } else if (mode === "retry"){
+    f.innerHTML = `<button class="lbtn ghost" id="retryBtn">আবার চেষ্টা করো</button><button class="lbtn" id="nextBtn">${nextLabel}</button>`;
+    $("retryBtn").onclick = retry;
+    $("nextBtn").onclick = next;
+  }
+}
+
+function check(){
+  const s = items[idx];
+  const attempt = answer.map(t => t.text).join(" ");
+  attempts++;
+  const area = $("answerArea"), fb = $("fb");
+  if (attempt === s.text){
+    playCorrectSound();
+    locked = true; drawTokens();
+    area.classList.add("ok");
+    solved.add(s.key);
+    if (attempts === 1 && !wrongSeen.has(s.key)) firstTryOk.add(s.key);
+    fb.className = "sb-feedback ok";
+    fb.textContent = attempts === 1 ? "একদম ঠিক! 🎉" : "এবার ঠিক হয়েছে! 👍";
+    setFooter("next-ok");
+  } else {
+    playWrongSound();
+    wrongSeen.add(s.key);
+    area.classList.remove("bad"); void area.offsetWidth; area.classList.add("bad");
+    fb.className = "sb-feedback bad";
+    fb.innerHTML = `ঠিক হয়নি। সঠিক বাক্যটা:<span class="correct-text">${esc(s.text)}</span>`;
+    setFooter("retry");
+  }
+}
+
+function retry(){
+  const s = items[idx];
+  bank = newBank(s); answer = []; locked = false;
+  $("fb").className = "sb-feedback";
+  $("answerArea").classList.remove("bad", "ok");
+  setFooter("check");
+  drawTokens();
+}
+
+function next(){
+  if (idx < items.length - 1){ idx++; renderItem(); }
+  else finish();
+}
+
+async function finish(){
+  const total = items.length;
+  const right = items.filter(s => firstTryOk.has(s.key)).length;
+  const wrong = total - right;
+  const stars = wrong === 0 ? 3 : (wrong <= 2 ? 2 : 1);
+
+  // প্রোগ্রেস সেভ: সমাধান করা বাক্যগুলো "শেখা" গোনা হবে
+  const doneSet = new Set(Array.isArray(progress.sentenceDone) ? progress.sentenceDone : []);
+  solved.forEach(k => doneSet.add(k));
+  progress.sentenceDone = [...doneSet];
+  const practice = markPracticeToday(progress);
+  bumpSessionsToday(progress);
+  try{
+    await setDoc(doc(db, "users", uid, "progress", "data"), Object.assign({
+      sentenceDone: progress.sentenceDone,
+      todayLessons: progress.todayLessons
+    }, practice), { merge: true });
+  }catch(e){ console.error("সেভ করা যায়নি:", e); }
+
+  $("segBar").innerHTML = "";
+  $("screen").innerHTML = `
+    <div class="res">
+      <h2>${wrong === 0 ? "অভিনন্দন!" : "ভালোই হচ্ছে!"}</h2>
+      <div class="sub">${wrong === 0 ? "সবগুলো বাক্য প্রথমবারেই ঠিক!" : "এভাবেই অনুশীলন চালিয়ে যাও"}</div>
+      <div class="stars">${[1,2,3].map(n => `<span class="star ${n <= stars ? "" : "off"}">⭐</span>`).join("")}</div>
+      <div class="tiles">
+        <div class="tile all">মোট<div class="box">${toBn(total)} টি</div></div>
+        <div class="tile ok">প্রথমবারে ঠিক<div class="box">${toBn(right)} টি</div></div>
+        <div class="tile bad">ভুল<div class="box">${toBn(wrong)}</div></div>
+      </div>
+    </div>`;
+  $("footer").innerHTML = `<a class="lbtn ghost" href="home.html" style="text-align:center; text-decoration:none; line-height:1.4;">হোমে ফিরে যাও</a><button class="lbtn" id="againBtn">আবার খেলো</button>`;
+  $("againBtn").onclick = () => startRound(window.__words);
+  if (wrong === 0) playCorrectSound();
+  window.scrollTo(0, 0);
+}
 </script>
 </body>
 </html>

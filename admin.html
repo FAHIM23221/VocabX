@@ -304,11 +304,14 @@
   }
   .add-admin-row { display: flex; gap: 10px; }
   .add-admin-row input {
+    min-width: 0;
     flex: 1; padding: 10px 14px; border-radius: 10px;
     border: 1.5px solid var(--border-color); background: var(--bg-color);
     font-family: 'Hind Siliguri', sans-serif; font-size: 0.92rem; color: var(--text-main);
   }
   .add-admin-row button {
+    flex: 0 0 auto;
+    white-space: nowrap;
     padding: 10px 18px; border-radius: 10px; border: none;
     background: var(--dark-green); color: #fff; font-weight: 600; cursor: pointer;
     font-family: 'Hind Siliguri', sans-serif; white-space: nowrap;
@@ -372,6 +375,14 @@
     padding: 40px 0;
   }
   
+  .inbox-btn-admin{
+    position:relative; width:40px; height:40px; border-radius:50%; border:1px solid var(--border-color);
+    display:flex; align-items:center; justify-content:center; font-size:1.15rem; text-decoration:none; color: var(--text-muted);
+  }
+  .inbox-badge{
+    position:absolute; top:-4px; right:-4px; min-width:18px; height:18px; padding:0 4px; border-radius:99px;
+    background:#C23B22; color:#fff; font-size:.68rem; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
   .logout-btn-admin {
     background: none;
     border: 1px solid var(--border-color);
@@ -406,6 +417,13 @@
   }
 
   @media (max-width: 600px) {
+    .admin-email {
+      flex: 1 1 100%;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .admin-header {
       flex-direction: column;
       align-items: flex-start;
@@ -413,13 +431,17 @@
     }
     .admin-user-info {
       width: 100%;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-start;
     }
     .user-row {
       padding: 12px 16px;
     }
   }
 </style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -432,6 +454,7 @@
     </div>
     <div class="admin-user-info">
       <span class="admin-email" id="adminEmailTag">...</span>
+      <a href="admin-chat.html" class="inbox-btn-admin" id="inboxBtn" title="সাপোর্ট ইনবক্স">💬<span class="inbox-badge" id="inboxBadge" style="display:none;"></span></a>
       <button class="theme-toggle-admin" id="themeToggle" title="থিম বদলাও">🌙</button>
       <button class="logout-btn-admin" id="logoutBtn" title="লগআউট">⎋</button>
     </div>
@@ -611,7 +634,18 @@ onAuthStateChanged(auth, async (user) => {
   loadUsers();
   loadNotice();
   loadPopupNotice();
+  loadInboxBadge();
 });
+
+// অপঠিত সাপোর্ট চ্যাটের সংখ্যা
+async function loadInboxBadge(){
+  try{
+    const snap = await getDocs(query(collection(db, "chats"), where("unreadForAdmin", "==", true)));
+    const n = snap.size;
+    const badge = document.getElementById("inboxBadge");
+    if (n > 0){ badge.textContent = toBn(n); badge.style.display = "flex"; }
+  }catch(e){ /* চ্যাট এখনো চালু হয়নি */ }
+}
 
 /* ---- সাবস্ক্রিপশন কোড ---- */
 let codesLoaded = false;
@@ -924,7 +958,7 @@ function openDetails(uid){
     ["ইমেইল", escapeHtml(u.email || "—")],
     ["রোল", targetIsMainAdmin ? "👑 মূল অ্যাডমিন" : (isAdminRow ? "অ্যাডমিন" : "ইউজার")],
     ["স্ট্যাটাস", u.banned ? "ব্যানড" : "সক্রিয়"],
-    ["সাবস্ক্রিপশন", sub.active ? `সক্রিয় · ${toBn(sub.daysLeft)} দিন বাকি` : (u.subscriptionActive ? "মেয়াদ শেষ" : "নেই")],
+    ["সাবস্ক্রিপশন", sub.active ? `সক্রিয় · ${toBn(sub.daysLeft)} দিন বাকি` : (u.subscriptionActive ? "মেয়াদ শেষ হয়ে গেছে" : "নেই")],
     ...(sub.active ? [["মেয়াদ শেষ", fmtDateBn(sub.expiresAt)]] : []),
     ...(u.phone ? [["মোবাইল", escapeHtml(u.phone)]] : []),
     ["যোগ দিয়েছে", fmtDate(u.createdAt)]

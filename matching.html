@@ -14,6 +14,8 @@
     document.documentElement.setAttribute("data-theme", "dark");
   }
 </script>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -77,6 +79,8 @@ import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { playCorrectSound, playWrongSound } from "./sounds.js";
+import { poolForLevel } from "./progress-utils.js";
+import { startTimeTracking } from "./timetrack.js";
 
 const ROUND_SIZE = 5;
 let ALL_WORDS = [];
@@ -98,12 +102,20 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "login.html";
     return;
   }
-  init();
+  init(user.uid);
 });
 
-async function init(){
+async function init(uid){
   const res = await fetch("words.json");
-  ALL_WORDS = await res.json();
+  const words = await res.json();
+  // সেটিংসে লেভেল বাছা থাকলে সেই লেভেল পর্যন্ত শব্দই আসবে
+  let prog = {};
+  try{
+    const ps = await getDoc(doc(db, "users", uid, "progress", "data"));
+    if (ps.exists()) prog = ps.data();
+  }catch(e){ /* প্রোগ্রেস না পেলে সব শব্দ */ }
+  ALL_WORDS = poolForLevel(words, prog);
+  startTimeTracking(db, uid);
   startRound();
 }
 

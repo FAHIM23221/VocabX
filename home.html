@@ -14,6 +14,8 @@
     document.documentElement.setAttribute("data-theme", "dark");
   }
 </script>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -22,6 +24,7 @@
     <div class="brand-lockup">Vocab<img src="logo-mark.png" alt="X"></div>
     <div class="stats">
       <button class="theme-toggle-btn" id="themeToggleBtn" title="থিম বদলাও">🌙</button>
+      <a href="chat.html" class="stat logout-btn" id="chatLink" title="সাপোর্ট চ্যাট" style="position:relative; text-decoration:none;">💬<span id="homeChatDot" style="display:none; position:absolute; top:-2px; right:-2px; width:10px; height:10px; border-radius:50%; background:#C23B22;"></span></a>
       <a href="profile.html" class="stat logout-btn" title="প্রোফাইল">👤</a>
     </div>
   </header>
@@ -30,11 +33,11 @@
     <div class="notice-banner is-hidden" id="noticeBanner">
       <!-- স্থির মোড: বেল আলাদা, টেক্সট কয়েক লাইনে -->
       <span class="bell" id="noticeBellStatic">🔔</span>
-      <span id="noticeTextStatic"></span>
+      <span id="noticeTextStatic" translate="no"></span>
 
       <!-- স্ক্রল মোড: বেল + টেক্সট একসাথে এক লাইনে চলবে -->
       <div class="marquee-viewport" id="marqueeViewport" style="display:none;">
-        <div class="marquee-track" id="noticeTextMarquee"></div>
+        <div class="marquee-track" id="noticeTextMarquee" translate="no"></div>
       </div>
     </div>
 
@@ -102,8 +105,8 @@
 <div class="popup-notice-overlay is-hidden" id="popupNoticeOverlay">
   <div class="popup-notice-card">
     <div class="icon">📢</div>
-    <h3 id="popupNoticeTitle">নোটিশ</h3>
-    <p id="popupNoticeText"></p>
+    <h3 id="popupNoticeTitle" translate="no">নোটিশ</h3>
+    <p id="popupNoticeText" translate="no"></p>
     <button id="popupNoticeCloseBtn">বুঝেছি</button>
   </div>
 </div>
@@ -161,6 +164,9 @@ onAuthStateChanged(auth, async (user) => {
 
   document.getElementById("greetName").textContent = "Hi, " + (data.name || "বন্ধু").split(" ")[0];
   currentUid = user.uid;
+  getDoc(doc(db, "chats", user.uid)).then(c => {
+    if (c.exists() && c.data().unreadForUser) document.getElementById("homeChatDot").style.display = "block";
+  }).catch(() => {});
   loadStats(user.uid);
   loadNotice();
   loadPopupNotice();

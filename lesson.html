@@ -110,6 +110,8 @@
   .review-card .m{ color:#1E9E1E; font-size:1.1rem; margin-top:2px; font-weight:600; }
   .review-intro{ margin: 6px 20px 16px; color: var(--ink-soft); font-size:.95rem; }
 </style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -129,12 +131,14 @@ import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { speak, playCorrectSound, playWrongSound } from "./sounds.js";
+import { markPracticeToday, bumpSessionsToday, poolForLevel } from "./progress-utils.js";
+import { startTimeTracking } from "./timetrack.js";
 
 const LESSON_SIZE = 5;
 
 let uid = null;
 let ALL = [];
-let progress = { strength:{}, streak:0, lastDay:null, practiceDates:[], bookmarks:[], lessonsCompleted:0 };
+let progress = { strength:{}, streak:0, lastDay:null, practiceDates:[], bookmarks:[], lessonsCompleted:0, level:null, challenge:null, todayLessons:null };
 let lesson = [];
 let idx = 0;
 
@@ -159,6 +163,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   uid = user.uid;
+  startTimeTracking(db, uid);
   await init();
 });
 
@@ -176,7 +181,10 @@ async function init(){
       lastDay: d.lastDay || null,
       practiceDates: Array.isArray(d.practiceDates) ? d.practiceDates : [],
       bookmarks: Array.isArray(d.bookmarks) ? d.bookmarks : [],
-      lessonsCompleted: d.lessonsCompleted || 0
+      lessonsCompleted: d.lessonsCompleted || 0,
+      level: d.level || null,
+      challenge: d.challenge || null,
+      todayLessons: d.todayLessons || null
     };
   }
   lesson = pickLesson();
@@ -230,7 +238,7 @@ function setFooter(html){ footer.innerHTML = html; }
 
 // দুর্বল শব্দ বেশি সম্ভাবনায় আসবে (মাস্টারি সিস্টেমের সাথে সামঞ্জস্যপূর্ণ)
 function pickLesson(){
-  const pool = [...ALL];
+  const pool = [...poolForLevel(ALL, progress)];
   const out = [];
   const n = Math.min(LESSON_SIZE, pool.length);
   while (out.length < n){
@@ -414,27 +422,17 @@ async function finalizeLesson(){
     progress.strength[k] = wrongFirst.has(w.id) ? Math.max(0, cur - 1) : Math.min(5, cur + 1);
   });
 
-  // দৈনিক স্ট্রিক
-  const today = new Date().toDateString();
-  const y = new Date(); y.setDate(y.getDate() - 1);
-  if (progress.lastDay !== today){
-    progress.streak = (progress.lastDay === y.toDateString()) ? (progress.streak || 0) + 1 : 1;
-    progress.lastDay = today;
-  }
-  const iso = localIso();
-  if (!progress.practiceDates.includes(iso)) progress.practiceDates.push(iso);
-  progress.practiceDates = progress.practiceDates.slice(-14);
+  const practiceFields = markPracticeToday(progress); // স্ট্রিক + ক্যালেন্ডার + ৬০ দিনের চ্যালেঞ্জ
+  bumpSessionsToday(progress);                        // আজকের দৈনিক লক্ষ্যের গণনা
 
   progress.lessonsCompleted = (progress.lessonsCompleted || 0) + 1;
 
   try{
-    await setDoc(progressRef(), {
+    await setDoc(progressRef(), Object.assign({
       strength: progress.strength,
-      streak: progress.streak,
-      lastDay: progress.lastDay,
-      practiceDates: progress.practiceDates,
-      lessonsCompleted: progress.lessonsCompleted
-    }, { merge: true });
+      lessonsCompleted: progress.lessonsCompleted,
+      todayLessons: progress.todayLessons
+    }, practiceFields), { merge: true });
   }catch(e){ console.error("প্রোগ্রেস সেভ করা যায়নি:", e); }
 }
 

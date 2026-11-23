@@ -58,6 +58,8 @@
   [data-theme="dark"] .msg.ok{ color:#4fe08a; }
   [data-theme="dark"] .msg.err{ color:#ff9a7e; }
 </style>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -84,6 +86,7 @@
         <li>নিচের ঘরে কোডটা বসিয়ে "কোড বসাও" চাপো।</li>
       </ol>
       <div class="contact-box" id="contactBox" style="display:none;"></div>
+      <a href="chat.html" style="display:block; margin-top:12px; text-align:center; padding:11px 0; border-radius:99px; background: var(--paper-deep); color: var(--ink); text-decoration:none; font-weight:600; font-size:.92rem;">💬 চ্যাটে অ্যাডমিনকে জানাও</a>
     </div>
 
     <div class="card">
@@ -146,6 +149,9 @@ onAuthStateChanged(auth, async (user) => {
   uid = user.uid;
   await refresh();
   loadContact();
+  // চ্যাট থেকে আসা কোড আগে থেকেই বসিয়ে দাও
+  const pre = new URLSearchParams(location.search).get("code");
+  if (pre && !$("codeInput").disabled) $("codeInput").value = pre;
 });
 
 async function refresh(){

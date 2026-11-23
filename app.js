@@ -2,6 +2,8 @@ import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { speak } from "./sounds.js";
+import { markPracticeToday } from "./progress-utils.js";
+import { startTimeTracking } from "./timetrack.js";
 
 /* ---------- state ---------- */
 let WORDS = [];
@@ -48,6 +50,7 @@ async function init(){
   WORDS = await res.json();
 
   await loadProgress();
+  startTimeTracking(db, currentUser.uid);
   bumpStreak();
   await saveProgress();
   renderStats();
@@ -74,6 +77,7 @@ async function loadProgress(){
       lastDay: data.lastDay || null,
       practiceDates: Array.isArray(data.practiceDates) ? data.practiceDates : []
     };
+    if (data.challenge) progress.challenge = data.challenge;
   } else {
     progress = { strength: {}, streak: 0, lastDay: null, practiceDates: [] };
   }
@@ -84,25 +88,7 @@ async function saveProgress(){
 }
 
 function bumpStreak(){
-  const today = new Date().toDateString();
-  if (progress.lastDay !== today){
-    progress.streak = (progress.lastDay === yesterdayStr()) ? (progress.streak || 0) + 1 : 1;
-    progress.lastDay = today;
-  }
-  // স্ট্রিক ক্যালেন্ডারের জন্য — সাম্প্রতিক কোন কোন দিনে প্র্যাকটিস হয়েছে তার একটা ছোট তালিকা
-  const todayIso = localIso();
-  if (!Array.isArray(progress.practiceDates)) progress.practiceDates = [];
-  if (!progress.practiceDates.includes(todayIso)){
-    progress.practiceDates.push(todayIso);
-    progress.practiceDates = progress.practiceDates.slice(-14); // সাইজ সীমিত রাখা
-  }
-}
-// স্থানীয় সময়ের তারিখ (YYYY-MM-DD) — UTC না, যাতে রাতের দিকে দিন গোলমাল না হয়
-function localIso(d){
-  d = d || new Date();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const da = String(d.getDate()).padStart(2, "0");
-  return d.getFullYear() + "-" + m + "-" + da;
+  markPracticeToday(progress); // স্ট্রিক + স্ট্রিক-ক্যালেন্ডার + (থাকলে) ৬০ দিনের চ্যালেঞ্জ
 }
 function yesterdayStr(){
   const d = new Date();
